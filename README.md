@@ -21,6 +21,49 @@ What ReminDB-Local-Hub adds:
 - FTS5 query hardening for real vault terms such as `three-tier`, `LR-2026-...`, `NEAR(three-tier stack)`, and `three-tier*`.
 - Windows path-prefix compatibility so the test suite and path hashing behave correctly on Windows.
 
+```mermaid
+flowchart LR
+    subgraph Agents["Agent harnesses"]
+        Claude["Claude Code"]
+        Codex["Codex"]
+        Gemini["Gemini CLI"]
+        Other["OpenCode / OpenClaw / other MCP clients"]
+    end
+
+    subgraph Bridges["Per-client stdio bridge processes"]
+        B1["remindb bridge"]
+        B2["remindb bridge"]
+        B3["remindb bridge"]
+        B4["remindb bridge"]
+    end
+
+    subgraph Hub["ReminDB-Local-Hub"]
+        Listener["127.0.0.1:39291"]
+        Server["singleton remindb serve --listen"]
+        Tools["Memory* MCP tools"]
+        Lock["one write lock"]
+        DB[("SQLite memory DB")]
+    end
+
+    Source["Source tree / vault / agent memory"] --> Compiler["compile + background rescan"]
+    Compiler --> Server
+
+    Claude -->|stdio| B1
+    Codex -->|stdio| B2
+    Gemini -->|stdio| B3
+    Other -->|stdio| B4
+
+    B1 -->|localhost TCP| Listener
+    B2 -->|localhost TCP| Listener
+    B3 -->|localhost TCP| Listener
+    B4 -->|localhost TCP| Listener
+
+    Listener --> Server
+    Server --> Tools
+    Tools --> Lock
+    Lock --> DB
+```
+
 Security boundary: ReminDB-Local-Hub is for localhost. MCP has no auth here; do not bind `--listen` to a public interface.
 
 ## Why This Exists
