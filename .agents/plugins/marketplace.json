@@ -1,11 +1,11 @@
 {
-    "name": "remindb",
+    "name": "remindb-local-hub",
     "interface": {
-        "displayName": "remindb"
+        "displayName": "ReminDB-Local-Hub"
     },
     "plugins": [
         {
-            "name": "remindb",
+            "name": "remindb-local-hub",
             "source": {
                 "source": "local",
                 "path": "./plugins/codex/remindb"

@@ -1,7 +1,7 @@
 {
-    "name": "remindb",
+    "name": "remindb-local-hub",
     "version": "0.1.8",
-    "description": "Token-efficient agentic memory database. Mounts remindb as an MCP server, exposing the Memory* tool suite over a compiled SQLite view of the workspace.",
+    "description": "Token-efficient agentic memory database. Mounts ReminDB-Local-Hub as an MCP server, exposing the Memory* tool suite over a compiled SQLite view of the workspace.",
     "homepage": "https://github.com/special-place-administrator/remindb-Local-Hub",
     "repository": "https://github.com/special-place-administrator/remindb-Local-Hub",
     "license": "MIT",
@@ -13,9 +13,9 @@
     ],
     "mcpServers": "./.mcp.json",
     "interface": {
-        "displayName": "remindb",
+        "displayName": "ReminDB-Local-Hub",
         "shortDescription": "Compiled SQLite memory for coding agents, exposed over MCP.",
-        "longDescription": "remindb compiles a workspace into a SQLite database and exposes a token-budgeted Memory* MCP tool suite. Agents read and update a compiled view of the workspace instead of re-reading files, cutting tokens by 75–99% on typical dev loops.",
+        "longDescription": "ReminDB-Local-Hub compiles a workspace into a SQLite database and exposes a token-budgeted Memory* MCP tool suite. Agents read and update a compiled view of the workspace instead of re-reading files, cutting tokens by 75–99% on typical dev loops.",
         "category": "Productivity"
     }
 }

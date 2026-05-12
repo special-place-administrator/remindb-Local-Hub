@@ -1,7 +1,7 @@
 {
     "name": "remindb-local-hub-openclaw",
     "version": "0.1.8",
-    "description": "OpenClaw plugin that mounts the remindb MCP server as a workspace memory backend",
+    "description": "OpenClaw plugin that mounts ReminDB-Local-Hub as a workspace memory backend",
     "main": "index.ts",
     "license": "MIT",
     "openclaw": {

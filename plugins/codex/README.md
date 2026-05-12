@@ -1,6 +1,6 @@
-# remindb for Codex
+# ReminDB-Local-Hub for Codex
 
-Drops [remindb Local Hub](https://github.com/special-place-administrator/remindb-Local-Hub) into OpenAI Codex as an MCP server. The agent picks up the full `remindb__Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
+Drops [ReminDB-Local-Hub](https://github.com/special-place-administrator/remindb-Local-Hub) into OpenAI Codex as an MCP server. The agent picks up the full `remindb__Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
 
 ## How it works
 
@@ -10,7 +10,7 @@ All tool logic lives in the Go binary; the plugin is a thin wrapper.
 
 ## Installation
 
-### 1. Install the remindb binary
+### 1. Install the ReminDB-Local-Hub binary
 
 It needs to be on `$PATH`. Until this fork publishes releases, build it from source:
 
@@ -78,7 +78,7 @@ Replace `/home/you` with your absolute `$HOME` — `config.toml` does not expand
 
 ### 4. Add the plugin
 
-There is no Local Hub Codex marketplace package yet. Use the explicit `[mcp_servers.remindb]` block above for now.
+There is no ReminDB-Local-Hub Codex marketplace package yet. Use the explicit `[mcp_servers.remindb]` block above for now.
 
 Do not install the upstream marketplace package if you need `remindb bridge`; that installs the upstream stdio-only server config.
 
@@ -107,4 +107,4 @@ The plugin surfaces the full `remindb` `Memory*` tool suite under the `remindb__
 
 ## License
 
-MIT — same as remindb.
+MIT — same as ReminDB-Local-Hub.

@@ -1,6 +1,6 @@
-# remindb — workspace memory backend
+# ReminDB-Local-Hub — workspace memory backend
 
-This Gemini CLI extension mounts remindb as an MCP server. remindb compiles a workspace into a SQLite database and exposes a token-budgeted `remindb__Memory*` tool suite over MCP.
+This Gemini CLI extension mounts ReminDB-Local-Hub as an MCP server. The `remindb` binary compiles a workspace into a SQLite database and exposes a token-budgeted `remindb__Memory*` tool suite over MCP.
 
 ## Why
 

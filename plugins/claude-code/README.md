@@ -1,6 +1,6 @@
-# remindb for Claude Code
+# ReminDB-Local-Hub for Claude Code
 
-Drops [remindb Local Hub](https://github.com/special-place-administrator/remindb-Local-Hub) into Claude Code as an MCP server. The agent picks up the full `Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
+Drops [ReminDB-Local-Hub](https://github.com/special-place-administrator/remindb-Local-Hub) into Claude Code as an MCP server. The agent picks up the full `Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
 
 ## How it works
 
@@ -10,7 +10,7 @@ Tools are namespaced, so `MemoryFetch` shows up as `remindb__MemoryFetch` in the
 
 ## Installation
 
-### 1. Install the remindb binary
+### 1. Install the ReminDB-Local-Hub binary
 
 It needs to be on `$PATH`. Until this fork publishes releases, build it from source:
 
@@ -86,7 +86,7 @@ Pick one:
 claude --plugin-dir ./plugins/claude-code
 ```
 
-There is no Local Hub marketplace package yet. Do not install the upstream marketplace package if you need `remindb bridge`; that installs the upstream stdio-only server config.
+There is no ReminDB-Local-Hub marketplace package yet. Do not install the upstream marketplace package if you need `remindb bridge`; that installs the upstream stdio-only server config.
 
 Either way, confirm the server is connected:
 
@@ -119,4 +119,4 @@ The plugin surfaces the full `remindb` `Memory*` tool suite under the `remindb__
 
 ## License
 
-MIT — same as remindb.
+MIT — same as ReminDB-Local-Hub.

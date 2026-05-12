@@ -1,6 +1,6 @@
 # Security policy
 
-`remindb` is a single-binary Go program that reads your notes and exposes them over MCP. The attack surface is small — a SQLite file, a stdio server, a handful of file parsers — but small isn't none. If you find something, please tell me before telling the world.
+`ReminDB-Local-Hub` is a single-binary Go program that reads your notes and exposes them over MCP. The attack surface is small — a SQLite file, a stdio server, a handful of file parsers — but small isn't none. If you find something, please tell me before telling the world.
 
 ## Reporting a vulnerability
 

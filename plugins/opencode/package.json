@@ -1,7 +1,7 @@
 {
     "name": "remindb-local-hub-opencode",
     "version": "0.1.8",
-    "description": "OpenCode plugin that mounts the remindb MCP server as a workspace memory backend",
+    "description": "OpenCode plugin that mounts ReminDB-Local-Hub as a workspace memory backend",
     "type": "module",
     "main": "plugin.ts",
     "license": "MIT",

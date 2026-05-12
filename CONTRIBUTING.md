@@ -1,4 +1,4 @@
-# Contributing to remindb
+# Contributing to ReminDB-Local-Hub
 
 This file is the routing map for contributing. The deep rules live in [`.claude/rules/`](./.claude/rules/) and the per-task workflow checklists live in [`.claude/skills/`](./.claude/skills/), so this guide points at them rather than restating them.
 
@@ -19,7 +19,7 @@ This file is the routing map for contributing. The deep rules live in [`.claude/
 
 ## Project design and goals
 
-`remindb` is a token-efficient agentic memory layer in a single SQLite file. The pipeline is `parser → transformer → emitter → store`; the read side is `query → mcp/tools`. See [README "Why This Exists"](./README.md#why-this-exists) for the long version.
+`ReminDB-Local-Hub` is a token-efficient agentic memory layer in a single SQLite file. The pipeline is `parser → transformer → emitter → store`; the read side is `query → mcp/tools`. See [README "Why This Exists"](./README.md#why-this-exists) for the long version.
 
 **Goals:**
 
@@ -221,4 +221,4 @@ Found a security issue? Do not open a public issue. Use a private advisory when 
 
 ## License
 
-`remindb` is MIT-licensed. By submitting a PR, you agree your contribution will be released under the same terms. The full text is in [`LICENSE`](./LICENSE).
+`ReminDB-Local-Hub` is MIT-licensed. By submitting a PR, you agree your contribution will be released under the same terms. The full text is in [`LICENSE`](./LICENSE).

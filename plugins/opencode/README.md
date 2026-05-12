@@ -1,6 +1,6 @@
-# remindb for OpenCode
+# ReminDB-Local-Hub for OpenCode
 
-Drops [remindb Local Hub](https://github.com/special-place-administrator/remindb-Local-Hub) into OpenCode as an MCP server. The agent picks up the full `remindb__Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
+Drops [ReminDB-Local-Hub](https://github.com/special-place-administrator/remindb-Local-Hub) into OpenCode as an MCP server. The agent picks up the full `remindb__Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
 
 ## How it works
 
@@ -11,7 +11,7 @@ OpenCode configures MCP servers in `opencode.json` under the top-level `mcp` obj
 
 ## Installation
 
-### 1. Install the remindb binary
+### 1. Install the ReminDB-Local-Hub binary
 
 It needs to be on `$PATH`. Until this fork publishes releases, build it from source:
 
@@ -94,7 +94,7 @@ The bundled file ships only the bare MCP entry — open it after curling and add
 
 Heads up: OpenCode only expands `{env:VARIABLE_NAME}` in config values — shell-style `$HOME` or `${HOME}` is treated as a literal string and won't work. Swap the paths for a different workspace (e.g., `{env:HOME}/notes` + `{env:HOME}/.cache/remindb/notes.db`) whenever you want OpenCode to read a different tree. Per-project is recommended so each workspace carries its own DB and source paths — OpenCode reads `opencode.json` on session start, so launching a fresh session from the new directory is enough to swap configs.
 
-**Optional — npm-distributed plugin stub.** Local Hub does not publish an npm package yet. Do not use the upstream npm package if you need `remindb bridge`.
+**Optional — npm-distributed plugin stub.** ReminDB-Local-Hub does not publish an npm package yet. Do not use the upstream npm package if you need `remindb bridge`.
 
 **Prefer a shell-inherited env?** Point the two values at your own env vars via the same substitution:
 
@@ -135,4 +135,4 @@ The plugin surfaces the full `remindb` `Memory*` tool suite under the `remindb__
 
 ## License
 
-MIT — same as remindb.
+MIT — same as ReminDB-Local-Hub.

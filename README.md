@@ -1,4 +1,4 @@
-<h1 align="center">remindb</h1>
+<h1 align="center">ReminDB-Local-Hub</h1>
 
 <p align="center">
   Agentic memory in a single SQLite file.
@@ -8,20 +8,20 @@
 
 ---
 
-## Local Hub
+## ReminDB-Local-Hub
 
-Local Hub mode makes remindb work correctly on Windows and multi-agent workstations.
+ReminDB-Local-Hub makes the `remindb` binary work correctly on Windows and multi-agent workstations.
 
-The original `remindb serve` command is stdio-first: each MCP client normally starts its own server process. That is fine for one terminal, but it is the wrong topology when Claude Code, Codex, Gemini, and other agents all point at the same SQLite database. Local Hub mode runs exactly one DB-owning server and lets every MCP client connect through a tiny stdio bridge.
+The original `remindb serve` command is stdio-first: each MCP client normally starts its own server process. That is fine for one terminal, but it is the wrong topology when Claude Code, Codex, Gemini, and other agents all point at the same SQLite database. ReminDB-Local-Hub runs exactly one DB-owning server and lets every MCP client connect through a tiny stdio bridge.
 
-What this fork adds:
+What ReminDB-Local-Hub adds:
 
 - `remindb serve --listen 127.0.0.1:39291` for a singleton local MCP server.
 - `remindb bridge` so existing stdio MCP clients can connect to that singleton server.
 - FTS5 query hardening for real vault terms such as `three-tier`, `LR-2026-...`, `NEAR(three-tier stack)`, and `three-tier*`.
 - Windows path-prefix compatibility so the test suite and path hashing behave correctly on Windows.
 
-Security boundary: Local Hub is for localhost. MCP has no auth here; do not bind `--listen` to a public interface.
+Security boundary: ReminDB-Local-Hub is for localhost. MCP has no auth here; do not bind `--listen` to a public interface.
 
 ## Why This Exists
 
@@ -65,11 +65,11 @@ A fresh compile starts every node at `temp=0.50`. The spread above is what an ag
 
 **FTS5 search, not grep.** Search runs on SQLite's FTS5 virtual table, built at write time with a porter tokenizer over labels, content, and types. `MemorySearch` returns ranked anchors in milliseconds — no file rescans, no regex timeouts — and trims to whatever token budget you pass. Ask for 500 tokens of matches, get exactly 500.
 
-**Portable by design.** The whole memory is one `.db` file. Copy it to another machine, hand it to another agent, commit it into a repo, sync it across devices. Upstream stdio mode lets one MCP-capable agent point `serve` at the file directly. Local Hub mode adds a localhost singleton so Claude Code, Codex, Gemini CLI, OpenCode, OpenClaw, and similar harnesses can share one local DB owner through `bridge`.
+**Portable by design.** The whole memory is one `.db` file. Copy it to another machine, hand it to another agent, commit it into a repo, sync it across devices. Upstream stdio mode lets one MCP-capable agent point `serve` at the file directly. ReminDB-Local-Hub adds a localhost singleton so Claude Code, Codex, Gemini CLI, OpenCode, OpenClaw, and similar harnesses can share one local DB owner through `bridge`.
 
 ## Install
 
-There are no Local Hub release installers yet. Build from source for now. Do not use upstream one-line installers if you need `remindb bridge`; upstream releases do not include Local Hub mode.
+There are no ReminDB-Local-Hub release installers yet. Build from source for now. Do not use upstream one-line installers if you need `remindb bridge`; upstream releases do not include ReminDB-Local-Hub.
 
 ### From source (Go 1.26+)
 
@@ -134,7 +134,7 @@ Optional but recommended: put a `.remindb.ignore` file at the source root to exc
 
 ### Configure MCP clients
 
-For Local Hub, every MCP client should spawn `remindb bridge`, not `remindb serve`. The bridge starts one singleton local server if needed:
+For ReminDB-Local-Hub, every MCP client should spawn `remindb bridge`, not `remindb serve`. The bridge starts one singleton local server if needed:
 
 ```text
 client stdio -> remindb bridge -> 127.0.0.1:39291 -> one remindb serve --listen process -> one .db
@@ -421,7 +421,7 @@ remindb bench \
 
 ### `update`
 
-Reinstalls remindb in place by re-running the official upstream install script. Until Local Hub publishes its own releases/installers, do not use `remindb update` if you need `bridge`; rebuild from this fork instead.
+Reinstalls remindb in place by re-running the configured install script. Until ReminDB-Local-Hub publishes its own releases/installers, do not use `remindb update` if you need `bridge`; rebuild from this repo instead.
 
 ```bash
 remindb update

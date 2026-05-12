@@ -1,6 +1,6 @@
-# remindb for OpenClaw
+# ReminDB-Local-Hub for OpenClaw
 
-Drops [remindb Local Hub](https://github.com/special-place-administrator/remindb-Local-Hub) into OpenClaw as an MCP server. The agent picks up the full `remindb__Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
+Drops [ReminDB-Local-Hub](https://github.com/special-place-administrator/remindb-Local-Hub) into OpenClaw as an MCP server. The agent picks up the full `remindb__Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
 
 ## How it works
 
@@ -10,7 +10,7 @@ Tools are namespaced by OpenClaw on load, so `MemoryFetch` becomes `remindb__Mem
 
 ## Installation
 
-### 1. Install the remindb binary
+### 1. Install the ReminDB-Local-Hub binary
 
 It needs to be on `$PATH`. Until this fork publishes releases, build it from source:
 
@@ -170,4 +170,4 @@ The plugin surfaces the full `remindb` `Memory*` tool suite under the `remindb__
 
 ## License
 
-MIT — same as remindb.
+MIT — same as ReminDB-Local-Hub.

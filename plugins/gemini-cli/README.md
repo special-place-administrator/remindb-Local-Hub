@@ -1,6 +1,6 @@
-# remindb for Gemini CLI
+# ReminDB-Local-Hub for Gemini CLI
 
-Drops [remindb Local Hub](https://github.com/special-place-administrator/remindb-Local-Hub) into Gemini CLI as an MCP server. The agent picks up the full `remindb__Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
+Drops [ReminDB-Local-Hub](https://github.com/special-place-administrator/remindb-Local-Hub) into Gemini CLI as an MCP server. The agent picks up the full `remindb__Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
 
 ## How it works
 
@@ -10,7 +10,7 @@ The extension ships a `gemini-extension.json` with an inlined `mcpServers` entry
 
 ## Installation
 
-### 1. Install the remindb binary
+### 1. Install the ReminDB-Local-Hub binary
 
 It needs to be on `$PATH`. Until this fork publishes releases, build it from source:
 
@@ -64,7 +64,7 @@ Add them to your shell rc (`~/.bashrc`, `~/.zshrc`, fish config) to make it perm
 
 ### 4. Install the extension
 
-`gemini extensions install` accepts a GitHub URL or a local path, but its URL form has no subdirectory selector. The plugin lives at `plugins/gemini-cli/` inside the remindb repo, so clone first and install from that subdirectory:
+`gemini extensions install` accepts a GitHub URL or a local path, but its URL form has no subdirectory selector. The plugin lives at `plugins/gemini-cli/` inside the ReminDB-Local-Hub repo, so clone first and install from that subdirectory:
 
 ```bash
 git clone https://github.com/special-place-administrator/remindb-Local-Hub.git ~/code/remindb-Local-Hub
@@ -113,4 +113,4 @@ The plugin surfaces the full `remindb` `Memory*` tool suite under the `remindb__
 
 ## License
 
-MIT — same as remindb.
+MIT — same as ReminDB-Local-Hub.

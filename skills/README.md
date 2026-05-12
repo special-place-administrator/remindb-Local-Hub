@@ -1,6 +1,6 @@
-# remindb skills
+# ReminDB-Local-Hub skills
 
-Two paired skills that teach an agent how to actually *use* remindb's MCP tool suite. Install them next to the [per-agent plugin](../plugins/) so the agent ships with both the MCP server and the know-how to drive it.
+Two paired skills that teach an agent how to actually use ReminDB-Local-Hub's MCP tool suite. Install them next to the [per-agent plugin](../plugins/) so the agent ships with both the MCP server and the know-how to drive it.
 
 ## What's here
 
@@ -55,5 +55,5 @@ cp -r skills/{remind,memoize} ~/.claude/skills/   # or your agent's path
 
 ## See also
 
-- [Top-level README](../README.md) — what remindb is, the MCP server, benchmarks
+- [Top-level README](../README.md) — what ReminDB-Local-Hub is, the MCP server, benchmarks
 - [`plugins/<agent>/README.md`](../plugins/) — per-agent MCP plugin install (the other half of setup)
