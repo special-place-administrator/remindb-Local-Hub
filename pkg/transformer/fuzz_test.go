@@ -5,7 +5,7 @@ import (
 	"testing"
 	"unicode/utf8"
 
-	"github.com/radimsem/remindb/pkg/parser"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/parser"
 )
 
 func FuzzCompress(f *testing.F) {

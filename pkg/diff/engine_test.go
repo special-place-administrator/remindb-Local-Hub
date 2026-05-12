@@ -3,7 +3,7 @@ package diff
 import (
 	"testing"
 
-	"github.com/radimsem/remindb/pkg/parser"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/parser"
 )
 
 func TestDiff_FirstCompilation(t *testing.T) {

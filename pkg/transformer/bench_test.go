@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/radimsem/remindb/pkg/parser"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/parser"
 )
 
 func benchNodes(n int) []*parser.ContextNode {

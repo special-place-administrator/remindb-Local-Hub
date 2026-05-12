@@ -12,10 +12,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/radimsem/remindb/internal/ignore"
-	"github.com/radimsem/remindb/internal/testutil"
-	"github.com/radimsem/remindb/pkg/compiler"
-	"github.com/radimsem/remindb/pkg/store"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/ignore"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/testutil"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/compiler"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/store"
 )
 
 func mustRescan(t *testing.T, st *store.Store, dir string, interval time.Duration, logger *slog.Logger) *RescanLoop {

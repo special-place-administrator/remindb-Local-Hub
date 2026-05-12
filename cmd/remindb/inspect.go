@@ -11,7 +11,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/radimsem/remindb/pkg/store"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/store"
 	"github.com/spf13/cobra"
 )
 

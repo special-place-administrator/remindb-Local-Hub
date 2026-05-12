@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	githubLatestURL = "https://api.github.com/repos/radimsem/remindb/releases/latest"
+	githubLatestURL = "https://api.github.com/repos/special-place-administrator/remindb-Local-Hub/releases/latest"
 	versionCheckTTL = 5 * time.Second
 )
 

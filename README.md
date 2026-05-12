@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="assets/logo.png" alt="remindb logo" width="400" />
-</p>
-
 <h1 align="center">remindb</h1>
 
 <p align="center">
@@ -10,16 +6,11 @@
   Stop letting your agent re-read the same notes every session.
 </p>
 
-<p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/special-place-administrator/remindb-Local-Hub?color=blue" alt="License" /></a>
-  <img src="https://img.shields.io/github/go-mod/go-version/special-place-administrator/remindb-Local-Hub" alt="Go version" />
-</p>
-
 ---
 
-## Local Hub fork
+## Local Hub
 
-This fork keeps upstream [`radimsem/remindb`](https://github.com/radimsem/remindb) intact in spirit, but adds **Local Hub mode** for Windows and multi-agent workstations.
+Local Hub mode makes remindb work correctly on Windows and multi-agent workstations.
 
 The original `remindb serve` command is stdio-first: each MCP client normally starts its own server process. That is fine for one terminal, but it is the wrong topology when Claude Code, Codex, Gemini, and other agents all point at the same SQLite database. Local Hub mode runs exactly one DB-owning server and lets every MCP client connect through a tiny stdio bridge.
 
@@ -32,11 +23,7 @@ What this fork adds:
 
 Security boundary: Local Hub is for localhost. MCP has no auth here; do not bind `--listen` to a public interface.
 
-<p align="center">
-  <img src="assets/arch.svg" alt="remindb architecture" width="100%" />
-</p>
-
-## Why I built this
+## Why This Exists
 
 Coding agents already have memory. `CLAUDE.md`, `AGENTS.md`, your notes folder, that growing pile of project READMEs. Stuff persists just fine.
 
@@ -82,7 +69,7 @@ A fresh compile starts every node at `temp=0.50`. The spread above is what an ag
 
 ## Install
 
-There are no Local Hub release installers yet. Build from source for now. Do not use upstream `radimsem/remindb` one-line installers if you need `remindb bridge`; upstream releases do not include Local Hub mode.
+There are no Local Hub release installers yet. Build from source for now. Do not use upstream one-line installers if you need `remindb bridge`; upstream releases do not include Local Hub mode.
 
 ### From source (Go 1.26+)
 
@@ -509,10 +496,6 @@ The scenario suite (tree · 3 searches · fetch · delta) rolls up into three wo
 >
 > The scenario list is also intentionally short. A real 30-minute agent session does dozens of orient/search/fetch/write/re-orient cycles, and the same search often fires three or four times as the agent loops on a problem. Each of those calls compounds toward **90%+ full-session savings** on realistic corpora.
 
-<p align="center">
-  <img src="assets/bench.svg" alt="remindb token savings by scenario category" width="100%" />
-</p>
-
 <sub>The `obsidian vault` row is a real vault: ~100 markdown files, ~600k naive tokens.</sub>
 
 Reproduce the table yourself:
@@ -523,22 +506,8 @@ Reproduce the table yourself:
 
 ## Contributing
 
-This is a project I maintain between classes — patches, bug reports, and ideas are genuinely welcome, and an extra pair of eyes goes a long way. The full guide lives in [`CONTRIBUTING.md`](./CONTRIBUTING.md): branch naming, the pre-PR checklist, the doc-update map, and how the AI-assisted workflow is wired up. If you want to start small, the "First-time contributors" section there has good entry points.
+Patches, bug reports, and installation notes are welcome. The guide lives in [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ## License
 
 MIT — see [`LICENSE`](LICENSE).
-
-## Support
-
-I'm a college student building agentic AI tooling in the evenings and weekends between classes. `remindb` is free, MIT-licensed, and will stay that way — no telemetry.
-
-If this saved you tokens (or saved you from reading the same 100 files for the hundredth time), even a small tip helps a lot.
-
-<p align="left">
-  <a href="https://www.buymeacoffee.com/radimsem" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
-</p>
-
-Or send BTC to `bc1qwyxsx7sledl4pru8y5ykd54fevsklytrv95ual`.
-
-Thanks for reading this far. If you end up using `remindb` in anger, I'd love to hear what you built — open an issue with a short story, or drop a star. Both matter more than you'd think.

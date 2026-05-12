@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/radimsem/remindb/internal/mcptest"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/mcptest"
 )
 
 // Simulates an OpenClaw agent session.

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/radimsem/remindb/pkg/compiler"
-	"github.com/radimsem/remindb/pkg/store"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/compiler"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/store"
 	"github.com/spf13/cobra"
 )
 

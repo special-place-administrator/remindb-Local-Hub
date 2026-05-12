@@ -9,10 +9,10 @@ import (
 	"time"
 
 	gomcp "github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/radimsem/remindb/pkg/compiler"
-	"github.com/radimsem/remindb/pkg/query"
-	"github.com/radimsem/remindb/pkg/store"
-	"github.com/radimsem/remindb/pkg/temperature"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/compiler"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/query"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/store"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/temperature"
 )
 
 func setup(t *testing.T) (*Deps, *store.Store) {

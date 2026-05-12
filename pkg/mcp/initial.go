@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/radimsem/remindb/pkg/compiler"
-	"github.com/radimsem/remindb/pkg/store"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/compiler"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/store"
 )
 
 // Run an initial compile when the store is empty; no-op otherwise.

@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/radimsem/remindb/internal/ignore"
-	"github.com/radimsem/remindb/internal/testutil"
-	"github.com/radimsem/remindb/pkg/store"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/ignore"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/testutil"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/store"
 )
 
 func writeFile(t *testing.T, dir, name, content string) string {

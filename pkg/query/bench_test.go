@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/radimsem/remindb/pkg/parser"
-	"github.com/radimsem/remindb/pkg/store"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/parser"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/store"
 )
 
 func benchScoredNodes(n int) []ScoredNode {

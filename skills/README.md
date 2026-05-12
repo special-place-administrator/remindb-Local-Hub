@@ -28,7 +28,7 @@ The [`plugins/<agent>/`](../plugins/) folders install the MCP server. The skills
 Every supported agent has a native skill loader. Clone once, copy into the agent's skills directory:
 
 ```bash
-git clone https://github.com/radimsem/remindb /tmp/remindb
+git clone https://github.com/special-place-administrator/remindb-Local-Hub /tmp/remindb
 cp -r /tmp/remindb/skills/{remind,memoize} ~/.claude/skills/             # Claude Code
 # or
 cp -r /tmp/remindb/skills/{remind,memoize} ~/.codex/skills/              # Codex

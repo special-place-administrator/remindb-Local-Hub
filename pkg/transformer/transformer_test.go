@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/radimsem/remindb/pkg/parser"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/parser"
 )
 
 func TestTransform_Integration(t *testing.T) {

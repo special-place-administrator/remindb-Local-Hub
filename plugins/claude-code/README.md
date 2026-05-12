@@ -86,7 +86,7 @@ Pick one:
 claude --plugin-dir ./plugins/claude-code
 ```
 
-There is no Local Hub marketplace package yet. Do not install `radimsem/remindb` from the marketplace if you need `remindb bridge`; that installs the upstream stdio-only server config.
+There is no Local Hub marketplace package yet. Do not install the upstream marketplace package if you need `remindb bridge`; that installs the upstream stdio-only server config.
 
 Either way, confirm the server is connected:
 
@@ -115,7 +115,7 @@ The plugin itself has no runtime options. `remindb bridge` resolves its DB and s
 
 ## Tools exposed
 
-The plugin surfaces the full `remindb` `Memory*` tool suite under the `remindb__` namespace. See the [main README](https://github.com/radimsem/remindb#mcp-tools) for the canonical tool list and per-tool token-savings benchmarks.
+The plugin surfaces the full `remindb` `Memory*` tool suite under the `remindb__` namespace. See the [main README](../../README.md#mcp-tools) for the canonical tool list and per-tool token-savings benchmarks.
 
 ## License
 

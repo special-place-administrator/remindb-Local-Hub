@@ -1,11 +1,6 @@
 # Contributing to remindb
 
-Thanks for being here. `remindb` is a one-person project I maintain between classes — patches, ideas, and bug reports are genuinely welcome. This file is the routing map for contributing; the deep rules live in [`.claude/rules/`](./.claude/rules/) and the per-task workflow checklists live in [`.claude/skills/`](./.claude/skills/), so this guide tries to point at them rather than restate them.
-
-<p align="center">
-  <a href="https://github.com/radimsem/remindb/issues/new"><img src="https://img.shields.io/badge/issue-bug%20or%20feature-orange" alt="Open an issue" /></a>
-  <a href="https://github.com/radimsem/remindb/compare"><img src="https://img.shields.io/badge/pull%20request-open-blue" alt="Open a pull request" /></a>
-</p>
+This file is the routing map for contributing. The deep rules live in [`.claude/rules/`](./.claude/rules/) and the per-task workflow checklists live in [`.claude/skills/`](./.claude/skills/), so this guide points at them rather than restating them.
 
 ## Table of contents
 
@@ -24,7 +19,7 @@ Thanks for being here. `remindb` is a one-person project I maintain between clas
 
 ## Project design and goals
 
-`remindb` is a token-efficient agentic memory layer in a single SQLite file. The pipeline is `parser → transformer → emitter → store`; the read side is `query → mcp/tools`. See [README "Why I built this"](./README.md#why-i-built-this) for the long version.
+`remindb` is a token-efficient agentic memory layer in a single SQLite file. The pipeline is `parser → transformer → emitter → store`; the read side is `query → mcp/tools`. See [README "Why This Exists"](./README.md#why-this-exists) for the long version.
 
 **Goals:**
 
@@ -36,7 +31,7 @@ Thanks for being here. `remindb` is a one-person project I maintain between clas
 
 ## Ways to contribute
 
-- **Bug reports** — open an [issue](https://github.com/radimsem/remindb/issues/new) with a minimal repro.
+- **Bug reports** — open an issue with a minimal repro.
 - **Feature ideas** — open an issue *first* to align on scope before coding.
 - **Code** — PRs against `dev` (never `main`), one logical change per PR.
 - **Docs** — typos, clarifications, public skills (`skills/`), private skills (`.claude/skills/`), this guide.
@@ -115,7 +110,7 @@ A change spanning two intents is two PRs, not one branch carrying both.
 5. **Run local verification** (next section).
 6. **Push the branch** and open a PR against `dev`. The [PR template](./.github/PULL_REQUEST_TEMPLATE.md) auto-applies.
 7. **Fill the template.** The `Verified` and `Touched` checklists exist so reviewers know what was tested and what surfaces moved. Skip checkboxes that don't apply rather than blank-checking everything.
-8. **Wait for review.** I'm a college student maintaining this between classes — I'll get to your PR, but it may take a few days.
+8. **Wait for review.**
 
 ## Local verification
 
@@ -180,7 +175,7 @@ If you touch X, update Y. CI won't catch a desynced public skill or stale README
 |---|---|
 | MCP tool added / renamed / removed | `skills/remind/SKILL.md` (read tools) or `skills/memoize/SKILL.md` (write tools); both if the change is shared. README's MCP tools table. |
 | Temperature config (`pkg/temperature/Config`) | Both public skills — `skills/remind/` documents the mental model, `skills/memoize/` documents the workflow it triggers. |
-| New parser format | README's "Why I built this" formats list (currently *Markdown, JSON, YAML, TOON*). |
+| New parser format | README's "Why This Exists" formats list (currently *Markdown, JSON, YAML, TOON*). |
 | CLI flag added / removed / renamed | README's CLI section. Each plugin README in `plugins/` that demos the flag. |
 | New migration | README's "How it's put together" Store row if the schema description shifts. The `add-store-query` skill if a new convention emerged. |
 | New private skill (`.claude/skills/`) | The `Workflow shortcuts` table in CLAUDE.md and (if it's a common task) in this CONTRIBUTING.md. |
@@ -218,11 +213,11 @@ For larger first contributions, open an issue first and we can scope something t
 
 ## Recognition
 
-Add a `Co-Authored-By: Your Name <email>` trailer to your commits if you'd like attribution. The trailer is preserved in `git log` and rendered on GitHub's commit pages, so your contribution stays attached to the work even if a reviewer squash-merges the topic branch.
+Use normal git commit metadata for contribution tracking.
 
 ## Security
 
-Found a security issue? Don't open a public issue — see [`SECURITY.md`](./SECURITY.md) for the disclosure channels (GitHub private advisory or `security@radimsemerak.cz`) and what to expect after you report.
+Found a security issue? Do not open a public issue. Use a private advisory when available.
 
 ## License
 

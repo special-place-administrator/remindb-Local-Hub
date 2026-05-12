@@ -5,10 +5,10 @@ import (
 	"log/slog"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/radimsem/remindb/pkg/mcp/tools"
-	"github.com/radimsem/remindb/pkg/query"
-	"github.com/radimsem/remindb/pkg/store"
-	"github.com/radimsem/remindb/pkg/temperature"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/mcp/tools"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/query"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/store"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/temperature"
 )
 
 type Server struct {

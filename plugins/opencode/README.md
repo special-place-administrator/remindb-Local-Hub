@@ -94,7 +94,7 @@ The bundled file ships only the bare MCP entry — open it after curling and add
 
 Heads up: OpenCode only expands `{env:VARIABLE_NAME}` in config values — shell-style `$HOME` or `${HOME}` is treated as a literal string and won't work. Swap the paths for a different workspace (e.g., `{env:HOME}/notes` + `{env:HOME}/.cache/remindb/notes.db`) whenever you want OpenCode to read a different tree. Per-project is recommended so each workspace carries its own DB and source paths — OpenCode reads `opencode.json` on session start, so launching a fresh session from the new directory is enough to swap configs.
 
-**Optional — npm-distributed plugin stub.** Local Hub does not publish an npm package yet. Do not use `@radimsem/remindb-opencode` if you need `remindb bridge`; that package belongs to upstream remindb.
+**Optional — npm-distributed plugin stub.** Local Hub does not publish an npm package yet. Do not use the upstream npm package if you need `remindb bridge`.
 
 **Prefer a shell-inherited env?** Point the two values at your own env vars via the same substitution:
 
@@ -131,7 +131,7 @@ Re-run whenever a file changes.
 
 ## Tools exposed
 
-The plugin surfaces the full `remindb` `Memory*` tool suite under the `remindb__` namespace. See the [main README](https://github.com/radimsem/remindb#mcp-tools) for the canonical tool list and per-tool token-savings benchmarks.
+The plugin surfaces the full `remindb` `Memory*` tool suite under the `remindb__` namespace. See the [main README](../../README.md#mcp-tools) for the canonical tool list and per-tool token-savings benchmarks.
 
 ## License
 

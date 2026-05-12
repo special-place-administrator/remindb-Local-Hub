@@ -6,8 +6,7 @@
 
 Two private channels, pick whichever is easier:
 
-- **GitHub security advisory** (preferred): [open one here](https://github.com/radimsem/remindb/security/advisories/new). Keeps the discussion, the fix, and any CVE threaded in one place.
-- **Email**: `security@radimsemerak.cz`. PGP welcome but not required.
+- **GitHub security advisory** (preferred): use this repository's private advisory flow when available. Keeps the discussion, the fix, and any CVE threaded in one place.
 
 Helpful to include:
 

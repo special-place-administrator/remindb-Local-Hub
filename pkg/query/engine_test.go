@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/radimsem/remindb/internal/testutil"
-	"github.com/radimsem/remindb/pkg/store"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/testutil"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/store"
 )
 
 func seedTree(t *testing.T, st *store.Store) {

@@ -166,7 +166,7 @@ openclaw mcp set remindb '{"command":"remindb","args":["bridge","--addr","127.0.
 
 ## Tools exposed
 
-The plugin surfaces the full `remindb` `Memory*` tool suite under the `remindb__` namespace. See the [main README](https://github.com/radimsem/remindb#mcp-tools) for the canonical tool list and per-tool token-savings benchmarks.
+The plugin surfaces the full `remindb` `Memory*` tool suite under the `remindb__` namespace. See the [main README](../../README.md#mcp-tools) for the canonical tool list and per-tool token-savings benchmarks.
 
 ## License
 

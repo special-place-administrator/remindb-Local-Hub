@@ -10,13 +10,13 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/radimsem/remindb/internal/fileext"
-	"github.com/radimsem/remindb/internal/ignore"
-	"github.com/radimsem/remindb/pkg/compiler"
-	"github.com/radimsem/remindb/pkg/diff"
-	"github.com/radimsem/remindb/pkg/emitter"
-	"github.com/radimsem/remindb/pkg/parser"
-	"github.com/radimsem/remindb/pkg/store"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/fileext"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/ignore"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/compiler"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/diff"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/emitter"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/parser"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/store"
 )
 
 const (

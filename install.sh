@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo="radimsem/remindb"
+repo="special-place-administrator/remindb-Local-Hub"
 prefix="$HOME/.local"
 
 usage() {

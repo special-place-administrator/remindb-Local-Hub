@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	installShellURL = "https://raw.githubusercontent.com/radimsem/remindb/main/install.sh"
-	installPSURL    = "https://raw.githubusercontent.com/radimsem/remindb/main/install.ps1"
+	installShellURL = "https://raw.githubusercontent.com/special-place-administrator/remindb-Local-Hub/main/install.sh"
+	installPSURL    = "https://raw.githubusercontent.com/special-place-administrator/remindb-Local-Hub/main/install.ps1"
 )
 
 var updateCmd = &cobra.Command{

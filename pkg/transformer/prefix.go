@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/radimsem/remindb/pkg/parser"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/parser"
 )
 
 // Strip compileRoot (or the longest common dir if empty) so hashed paths stay stable across call shapes.

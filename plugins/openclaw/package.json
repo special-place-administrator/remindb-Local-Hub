@@ -11,10 +11,10 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/radimsem/remindb",
+        "url": "https://github.com/special-place-administrator/remindb-Local-Hub",
         "directory": "plugins/openclaw"
     },
-    "homepage": "https://github.com/radimsem/remindb",
+    "homepage": "https://github.com/special-place-administrator/remindb-Local-Hub",
     "keywords": [
         "remindb",
         "openclaw",

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	gomcp "github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/radimsem/remindb/pkg/query"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/query"
 )
 
 type SearchInput struct {

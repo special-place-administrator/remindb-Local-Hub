@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/radimsem/remindb/migrations"
+	"github.com/special-place-administrator/remindb-Local-Hub/migrations"
 )
 
 const createMigrationsTable = `

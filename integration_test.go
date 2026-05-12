@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/radimsem/remindb/internal/testutil"
-	"github.com/radimsem/remindb/pkg/compiler"
-	"github.com/radimsem/remindb/pkg/query"
-	"github.com/radimsem/remindb/pkg/temperature"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/testutil"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/compiler"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/query"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/temperature"
 )
 
 // Simulate compiling an OpenClaw agent definition, then searching and fetching context as the agent would at runtime.

@@ -3,7 +3,7 @@ package transformer
 import (
 	"testing"
 
-	"github.com/radimsem/remindb/pkg/parser"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/parser"
 )
 
 func TestCompressPrefix_CommonDir(t *testing.T) {

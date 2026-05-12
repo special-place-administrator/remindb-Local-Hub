@@ -1,4 +1,4 @@
-module github.com/radimsem/remindb
+module github.com/special-place-administrator/remindb-Local-Hub
 
 go 1.26.2
 

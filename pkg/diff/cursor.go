@@ -1,6 +1,6 @@
 package diff
 
-import "github.com/radimsem/remindb/pkg/parser"
+import "github.com/special-place-administrator/remindb-Local-Hub/pkg/parser"
 
 // Build a NodeState map from enriched nodes.
 func SnapshotFromNodes(roots []*parser.ContextNode) map[string]NodeState {

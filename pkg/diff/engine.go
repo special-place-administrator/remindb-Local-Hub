@@ -3,7 +3,7 @@ package diff
 import (
 	"sort"
 
-	"github.com/radimsem/remindb/pkg/parser"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/parser"
 )
 
 // Compare enriched nodes against the previous snapshot and returns one.

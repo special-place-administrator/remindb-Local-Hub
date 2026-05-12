@@ -10,9 +10,9 @@ import (
 	"strings"
 
 	gomcp "github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/radimsem/remindb/internal/fileext"
-	"github.com/radimsem/remindb/internal/tokens"
-	"github.com/radimsem/remindb/pkg/store"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/fileext"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/tokens"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/store"
 )
 
 // Tree: MemoryTree vs `find` + `cat *` over the dir.

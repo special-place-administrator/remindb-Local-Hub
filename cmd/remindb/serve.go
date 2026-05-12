@@ -11,9 +11,9 @@ import (
 	"time"
 
 	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
-	remindb "github.com/radimsem/remindb/pkg/mcp"
-	"github.com/radimsem/remindb/pkg/store"
-	"github.com/radimsem/remindb/pkg/temperature"
+	remindb "github.com/special-place-administrator/remindb-Local-Hub/pkg/mcp"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/store"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/temperature"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 )

@@ -2,11 +2,8 @@
     "name": "remindb",
     "description": "Token-efficient agentic memory database. Mounts remindb as an MCP server, exposing the Memory* tool suite over a compiled SQLite view of the workspace.",
     "version": "0.1.8",
-    "author": {
-        "name": "radimsem"
-    },
-    "homepage": "https://github.com/radimsem/remindb",
-    "repository": "https://github.com/radimsem/remindb",
+    "homepage": "https://github.com/special-place-administrator/remindb-Local-Hub",
+    "repository": "https://github.com/special-place-administrator/remindb-Local-Hub",
     "license": "MIT",
     "keywords": [
         "remindb",

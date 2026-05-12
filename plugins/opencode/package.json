@@ -7,10 +7,10 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/radimsem/remindb",
+        "url": "https://github.com/special-place-administrator/remindb-Local-Hub",
         "directory": "plugins/opencode"
     },
-    "homepage": "https://github.com/radimsem/remindb",
+    "homepage": "https://github.com/special-place-administrator/remindb-Local-Hub",
     "keywords": [
         "remindb",
         "opencode",

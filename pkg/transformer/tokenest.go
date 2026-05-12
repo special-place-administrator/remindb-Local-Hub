@@ -1,8 +1,8 @@
 package transformer
 
 import (
-	"github.com/radimsem/remindb/internal/tokens"
-	"github.com/radimsem/remindb/pkg/parser"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/tokens"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/parser"
 )
 
 func setTokenCount(n *parser.ContextNode) {

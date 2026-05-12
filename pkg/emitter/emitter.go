@@ -6,9 +6,9 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/radimsem/remindb/pkg/diff"
-	"github.com/radimsem/remindb/pkg/parser"
-	"github.com/radimsem/remindb/pkg/store"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/diff"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/parser"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/store"
 )
 
 type Option func(*options)

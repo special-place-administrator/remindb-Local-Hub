@@ -80,7 +80,7 @@ Replace `/home/you` with your absolute `$HOME` — `config.toml` does not expand
 
 There is no Local Hub Codex marketplace package yet. Use the explicit `[mcp_servers.remindb]` block above for now.
 
-Do not install `radimsem/remindb` from the marketplace if you need `remindb bridge`; that installs the upstream stdio-only server config.
+Do not install the upstream marketplace package if you need `remindb bridge`; that installs the upstream stdio-only server config.
 
 Confirm the server is connected by launching Codex and running the `/mcp` slash command in the TUI:
 
@@ -103,7 +103,7 @@ Re-run whenever a file changes.
 
 ## Tools exposed
 
-The plugin surfaces the full `remindb` `Memory*` tool suite under the `remindb__` namespace. See the [main README](https://github.com/radimsem/remindb#mcp-tools) for the canonical tool list and per-tool token-savings benchmarks.
+The plugin surfaces the full `remindb` `Memory*` tool suite under the `remindb__` namespace. See the [main README](../../README.md#mcp-tools) for the canonical tool list and per-tool token-savings benchmarks.
 
 ## License
 

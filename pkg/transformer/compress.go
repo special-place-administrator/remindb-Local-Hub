@@ -3,7 +3,7 @@ package transformer
 import (
 	"strings"
 
-	"github.com/radimsem/remindb/pkg/parser"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/parser"
 )
 
 // Normalize whitespace.

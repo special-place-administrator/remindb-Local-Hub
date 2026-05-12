@@ -8,7 +8,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 
-$repo = 'radimsem/remindb'
+$repo = 'special-place-administrator/remindb-Local-Hub'
 
 function Show-Usage {
 	@"

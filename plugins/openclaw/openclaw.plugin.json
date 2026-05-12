@@ -3,7 +3,7 @@
     "name": "remindb",
     "version": "0.1.8",
     "description": "Token-efficient agentic memory database. Exposes the Memory* MCP tool suite so OpenClaw agents can work against a compiled view of their workspace.",
-    "homepage": "https://github.com/radimsem/remindb",
+    "homepage": "https://github.com/special-place-administrator/remindb-Local-Hub",
     "license": "MIT",
     "activation": {
         "onStartup": false

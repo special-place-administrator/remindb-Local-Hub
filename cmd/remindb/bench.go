@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/radimsem/remindb/internal/bench"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/bench"
 	"github.com/spf13/cobra"
 )
 

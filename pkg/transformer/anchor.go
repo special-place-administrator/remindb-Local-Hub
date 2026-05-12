@@ -1,8 +1,8 @@
 package transformer
 
 import (
-	"github.com/radimsem/remindb/internal/contentid"
-	"github.com/radimsem/remindb/pkg/parser"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/contentid"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/parser"
 )
 
 func setContentHash(n *parser.ContextNode) {

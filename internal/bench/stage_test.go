@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/radimsem/remindb/internal/ignore"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/ignore"
 )
 
 func writeFile(t *testing.T, dir, name, content string) {

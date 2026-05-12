@@ -37,7 +37,7 @@ Pipeline: `parser → transformer → emitter → store`. Read side: `query → 
 | Commit, sign, branch, tag, push, release rules | `.claude/rules/git-versioning.md` |
 | MCP tool contract (signature, locking, returns) | `.claude/rules/mcp-tool-conventions.md` |
 | `slog` levels, fields, what never logs | `.claude/rules/logging-conventions.md` |
-| User & feedback memory across sessions | `.claude/projects/-home-radimsem-personal-projects-remindb/memory/MEMORY.md` (auto-loaded) |
+| User & feedback memory across sessions | project-local Claude memory when configured |
 
 ## Tread carefully — pause before implementing
 

@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/radimsem/remindb/internal/fileext"
-	"github.com/radimsem/remindb/internal/ignore"
-	"github.com/radimsem/remindb/pkg/store"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/fileext"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/ignore"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/store"
 )
 
 type benchStage struct {

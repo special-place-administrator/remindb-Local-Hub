@@ -3,7 +3,7 @@ package query
 import (
 	"testing"
 
-	"github.com/radimsem/remindb/pkg/store"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/store"
 )
 
 func TestFillBudget_FitsAll(t *testing.T) {

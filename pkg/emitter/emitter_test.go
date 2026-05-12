@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/radimsem/remindb/internal/testutil"
-	"github.com/radimsem/remindb/pkg/diff"
-	"github.com/radimsem/remindb/pkg/parser"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/testutil"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/diff"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/parser"
 )
 
 func TestEmit_FirstCompilation(t *testing.T) {

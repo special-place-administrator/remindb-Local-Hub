@@ -6,10 +6,10 @@ import (
 	"time"
 
 	gomcp "github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/radimsem/remindb/internal/contentid"
-	"github.com/radimsem/remindb/internal/tokens"
-	"github.com/radimsem/remindb/pkg/diff"
-	"github.com/radimsem/remindb/pkg/parser"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/contentid"
+	"github.com/special-place-administrator/remindb-Local-Hub/internal/tokens"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/diff"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/parser"
 )
 
 type SummarizeInput struct {

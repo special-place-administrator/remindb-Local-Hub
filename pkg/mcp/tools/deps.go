@@ -6,12 +6,12 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/radimsem/remindb/pkg/diff"
-	"github.com/radimsem/remindb/pkg/emitter"
-	"github.com/radimsem/remindb/pkg/parser"
-	"github.com/radimsem/remindb/pkg/query"
-	"github.com/radimsem/remindb/pkg/store"
-	"github.com/radimsem/remindb/pkg/temperature"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/diff"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/emitter"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/parser"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/query"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/store"
+	"github.com/special-place-administrator/remindb-Local-Hub/pkg/temperature"
 )
 
 type Deps struct {
