@@ -22,19 +22,52 @@ What ReminDB-Local-Hub adds:
 - Windows path-prefix compatibility so the test suite and path hashing behave correctly on Windows.
 
 ```mermaid
-flowchart TD
-    Clients["Agent harnesses<br/>Claude Code, Codex, Gemini CLI<br/>OpenCode, OpenClaw, other MCP clients"]
-    Bridge["Each client starts<br/>remindb bridge"]
-    Listener["Local listener<br/>127.0.0.1:39291"]
-    Server["One DB-owning server<br/>remindb serve --listen"]
-    Tools["Memory* MCP tools"]
-    Lock["Serialized writes<br/>one Store.OpMu"]
-    DB[("SQLite memory DB")]
-    Source["Source tree / vault / agent memory"]
-    Rescan["compile + background rescan"]
+flowchart LR
+    subgraph Clients["MCP clients"]
+        direction TB
+        Claude["Claude Code"]
+        Codex["Codex"]
+        Gemini["Gemini CLI"]
+        OpenCode["OpenCode"]
+        OpenClaw["OpenClaw / others"]
+    end
 
-    Clients -->|stdio| Bridge
-    Bridge -->|localhost TCP| Listener
+    subgraph Bridges["one stdio bridge per client"]
+        direction TB
+        ClaudeBridge["remindb bridge"]
+        CodexBridge["remindb bridge"]
+        GeminiBridge["remindb bridge"]
+        OpenCodeBridge["remindb bridge"]
+        OpenClawBridge["remindb bridge"]
+    end
+
+    subgraph Hub["ReminDB-Local-Hub"]
+        direction TB
+        Listener["127.0.0.1:39291"]
+        Server["single remindb serve --listen"]
+        Tools["Memory* MCP tools"]
+        Lock["Store.OpMu write lock"]
+        DB[("SQLite memory DB")]
+    end
+
+    subgraph Corpus["indexed corpus"]
+        direction TB
+        Source["vault / docs / agent memory"]
+        Rescan["compile + background rescan"]
+    end
+
+    Claude -->|stdio| ClaudeBridge
+    Codex -->|stdio| CodexBridge
+    Gemini -->|stdio| GeminiBridge
+    OpenCode -->|stdio| OpenCodeBridge
+    OpenClaw -->|stdio| OpenClawBridge
+
+    ClaudeBridge -->|localhost TCP| Listener
+    CodexBridge -->|localhost TCP| Listener
+    GeminiBridge -->|localhost TCP| Listener
+    OpenCodeBridge -->|localhost TCP| Listener
+    OpenClawBridge -->|localhost TCP| Listener
+
     Listener --> Server
     Server --> Tools
     Tools --> Lock
