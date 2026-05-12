@@ -706,6 +706,21 @@ func TestRewriteQuery(t *testing.T) {
 		{"label:snapshot", "label:snapshot"},
 		{"snap*", "snap*"},
 		{"NEAR(a b)", "NEAR(a b)"},
+		// Hyphenated and special-char terms are quoted as FTS5 phrases.
+		// Bareword "LR-2026" hits FTS5's column-ref parser: "no such
+		// column: 2026". Quoting forces phrase match against tokens.
+		{"LR-2026-05-09-001a", `"LR-2026-05-09-001a"`},
+		{"three-tier", `"three-tier"`},
+		{"docker-compose feature", `"docker-compose" OR feature`},
+		{"path/to/file", `"path/to/file"`},
+		{"node.id", `"node.id"`},
+		{"hello-world goodbye-world", `"hello-world" OR "goodbye-world"`},
+		{"LR-2026-05-09-001a OR three-tier", `"LR-2026-05-09-001a" OR "three-tier"`},
+		{"docker-compose AND configuration", `"docker-compose" AND configuration`},
+		{"label:snapshot LR-2026-05-09-001a", `label:snapshot OR "LR-2026-05-09-001a"`},
+		{`"quoted phrase" LR-2026-05-09-001a`, `"quoted phrase" OR "LR-2026-05-09-001a"`},
+		// Non-ASCII letters also need phrase quoting.
+		{"naïve", `"naïve"`},
 	}
 
 	for _, tt := range tests {
