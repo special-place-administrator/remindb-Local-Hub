@@ -62,27 +62,37 @@ func canonicalizePath(input, sourceDir string) (string, error) {
 		return input, nil
 	}
 
-	absInput, err := filepath.Abs(input)
-	if err != nil {
-		return "", fmt.Errorf("failed to resolve: %s: %w", input, err)
-	}
 	absSource, err := filepath.Abs(sourceDir)
 	if err != nil {
 		return "", fmt.Errorf("failed to resolve: %s: %w", sourceDir, err)
-	}
-
-	if resolved, err := filepath.EvalSymlinks(absInput); err == nil {
-		absInput = resolved
 	}
 	if resolved, err := filepath.EvalSymlinks(absSource); err == nil {
 		absSource = resolved
 	}
 
+	inputWasRelative := !filepath.IsAbs(input)
+	candidate := input
+	if inputWasRelative {
+		candidate = filepath.Join(absSource, input)
+	}
+
+	absInput, err := filepath.Abs(candidate)
+	if err != nil {
+		return "", fmt.Errorf("failed to resolve: %s: %w", input, err)
+	}
+
+	if resolved, err := filepath.EvalSymlinks(absInput); err == nil {
+		absInput = resolved
+	}
+
 	rel, err := filepath.Rel(absSource, absInput)
 	outsideSource := rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator))
 	if err != nil || outsideSource {
+		if inputWasRelative {
+			return absInput, nil
+		}
 		return input, nil
 	}
 
-	return filepath.Join(sourceDir, rel), nil
+	return filepath.Join(absSource, rel), nil
 }

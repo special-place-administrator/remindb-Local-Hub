@@ -201,6 +201,35 @@ func TestHandleCompile_AnchorsToSourceDir(t *testing.T) {
 	}
 }
 
+func TestHandleCompile_RelativeDotAnchorsToSourceDir(t *testing.T) {
+	d, st := setup(t)
+	ctx := context.Background()
+	dir := t.TempDir()
+	other := t.TempDir()
+	t.Chdir(other)
+
+	p := filepath.Join(dir, "doc.md")
+	if err := os.WriteFile(p, []byte("# Test\n\nHello from source.\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	d.SourceDir = dir
+
+	if _, _, err := d.HandleCompile(ctx, &gomcp.CallToolRequest{}, CompileInput{
+		Path: ".",
+	}); err != nil {
+		t.Fatalf("HandleCompile: %v", err)
+	}
+
+	after, err := st.GetStats(ctx)
+	if err != nil {
+		t.Fatalf("GetStats after: %v", err)
+	}
+	if after.NodeCount == 0 {
+		t.Fatal("relative dot compiled process cwd instead of source dir")
+	}
+}
+
 func TestCanonicalizePath(t *testing.T) {
 	dir := t.TempDir()
 	sub := filepath.Join(dir, "sub")
@@ -212,6 +241,7 @@ func TestCanonicalizePath(t *testing.T) {
 	if err := os.WriteFile(file, []byte("x"), 0o644); err != nil {
 		t.Fatal(err)
 	}
+	outsideFile := filepath.Join(t.TempDir(), "outside.md")
 
 	tests := []struct {
 		name      string
@@ -237,11 +267,19 @@ func TestCanonicalizePath(t *testing.T) {
 		},
 		{
 			name:  "outside source tree passes through",
-			input: "/etc/hosts", sourceDir: dir, want: "/etc/hosts",
+			input: outsideFile, sourceDir: dir, want: outsideFile,
 		},
 		{
 			name:  "compile root itself stays as the source dir form",
 			input: dir, sourceDir: dir, want: dir,
+		},
+		{
+			name:  "relative dot anchors to source dir",
+			input: ".", sourceDir: dir, want: dir,
+		},
+		{
+			name:  "relative child anchors to source dir",
+			input: filepath.Join("sub", "doc.md"), sourceDir: dir, want: file,
 		},
 	}
 
