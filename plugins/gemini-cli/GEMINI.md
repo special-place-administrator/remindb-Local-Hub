@@ -23,4 +23,4 @@ If `~/.gemini/skills/remind/` and `~/.gemini/skills/memoize/` are loaded, follow
 
 ## Activation
 
-`remindb serve` launches over stdio when the extension activates. It resolves its DB and source paths from `REMINDB_DB` and `REMINDB_SOURCE` in the environment — set both **before** launching Gemini, otherwise remindb falls back to a stray `memory.db` in cwd.
+`remindb bridge` launches over stdio when the extension activates. It resolves its DB and source paths from `REMINDB_DB` and `REMINDB_SOURCE` in the environment, then connects to one singleton local `remindb serve --listen` process. Set both variables **before** launching Gemini, otherwise remindb falls back to a stray `memory.db` in cwd.

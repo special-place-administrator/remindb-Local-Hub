@@ -1,10 +1,10 @@
 # remindb for Codex
 
-Drops [remindb](https://github.com/radimsem/remindb) into OpenAI Codex as an MCP server. The agent picks up the full `remindb__Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
+Drops [remindb Local Hub](https://github.com/special-place-administrator/remindb-Local-Hub) into OpenAI Codex as an MCP server. The agent picks up the full `remindb__Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
 
 ## How it works
 
-Codex treats the repository as a marketplace catalog (`.agents/plugins/marketplace.json` at the repo root) that lists one plugin, `plugins/codex/remindb/`. The plugin's `.codex-plugin/plugin.json` points at sibling `.mcp.json`, which Codex uses to spawn `remindb serve` over stdio.
+Codex treats the repository as a marketplace catalog (`.agents/plugins/marketplace.json` at the repo root) that lists one plugin, `plugins/codex/remindb/`. The plugin's `.codex-plugin/plugin.json` points at sibling `.mcp.json`, which Codex uses to spawn `remindb bridge` over stdio. The bridge connects to one singleton local `remindb serve --listen` process so several agents can share the same `.db` safely.
 
 All tool logic lives in the Go binary; the plugin is a thin wrapper.
 
@@ -12,16 +12,25 @@ All tool logic lives in the Go binary; the plugin is a thin wrapper.
 
 ### 1. Install the remindb binary
 
-It needs to be on `$PATH`:
+It needs to be on `$PATH`. Until this fork publishes releases, build it from source:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/radimsem/remindb/main/install.sh | bash
+git clone https://github.com/special-place-administrator/remindb-Local-Hub.git
+cd remindb-Local-Hub
+go test ./...
+go build -o ~/.local/bin/remindb ./cmd/remindb
 ```
 
 On Windows:
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/radimsem/remindb/main/install.ps1 | iex
+git clone https://github.com/special-place-administrator/remindb-Local-Hub.git
+cd remindb-Local-Hub
+go test ./...
+go build -o .\remindb.exe .\cmd\remindb
+$installDir = "$env:LOCALAPPDATA\Programs\remindb\bin"
+New-Item -ItemType Directory -Force -Path $installDir | Out-Null
+Copy-Item .\remindb.exe "$installDir\remindb.exe" -Force
 ```
 
 Verify:
@@ -45,11 +54,12 @@ remindb compile ~/.codex/memories --db ~/.cache/remindb/codex.db
 
 ### 3. Point remindb at your workspace
 
-`remindb serve` reads `REMINDB_DB` and `REMINDB_SOURCE` as fallbacks for its `--db` and `--source` flags. Codex propagates the launching shell's environment to plugin-spawned MCP subprocesses, so export them in the shell **before launching Codex with the plugin enabled** — otherwise the first activation falls back to a stray `memory.db` in cwd:
+`remindb bridge` reads `REMINDB_DB` and `REMINDB_SOURCE` as fallbacks for its `--db` and `--source` flags. Codex propagates the launching shell's environment to plugin-spawned MCP subprocesses, so export them in the shell **before launching Codex with the plugin enabled** — otherwise the first activation falls back to a stray `memory.db` in cwd:
 
 ```bash
 export REMINDB_DB=$HOME/.cache/remindb/codex.db
 export REMINDB_SOURCE=$HOME/.codex/memories
+export REMINDB_RESCAN_INTERVAL=60s
 ```
 
 Stick them in `~/.bashrc` / `~/.zshrc` / your fish equivalent to make it permanent, or scope to a single session if you want to switch workspaces between runs.
@@ -61,19 +71,16 @@ Why the workaround? Codex's `[plugins.<name>]` table only accepts `enabled` and 
 ```toml
 [mcp_servers.remindb]
 command = "remindb"
-args = ["serve"]
-env = { REMINDB_DB = "/home/you/.cache/remindb/codex.db", REMINDB_SOURCE = "/home/you/.codex/memories" }
+args = ["bridge", "--addr", "127.0.0.1:39291", "--db", "/home/you/.cache/remindb/codex.db", "--source", "/home/you/.codex/memories", "--rescan-interval", "60s"]
 ```
 
 Replace `/home/you` with your absolute `$HOME` — `config.toml` does not expand it. This registers `remindb` as a user-defined MCP server, not a plugin server, so the plugin can stay disabled or removed entirely if you take this path.
 
-### 4. Add the plugin from GitHub
+### 4. Add the plugin
 
-```bash
-codex plugin marketplace add radimsem/remindb
-```
+There is no Local Hub Codex marketplace package yet. Use the explicit `[mcp_servers.remindb]` block above for now.
 
-That single command does both jobs: the marketplace's `policy.installation: INSTALLED_BY_DEFAULT` makes Codex install the bundled plugin in the same step. The plugin caches at `~/.codex/plugins/cache/remindb/remindb/<version>/`; the marketplace registration lives in `~/.codex/config.toml`.
+Do not install `radimsem/remindb` from the marketplace if you need `remindb bridge`; that installs the upstream stdio-only server config.
 
 Confirm the server is connected by launching Codex and running the `/mcp` slash command in the TUI:
 

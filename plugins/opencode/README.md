@@ -1,28 +1,37 @@
 # remindb for OpenCode
 
-Drops [remindb](https://github.com/radimsem/remindb) into OpenCode as an MCP server. The agent picks up the full `remindb__Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
+Drops [remindb Local Hub](https://github.com/special-place-administrator/remindb-Local-Hub) into OpenCode as an MCP server. The agent picks up the full `remindb__Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
 
 ## How it works
 
 OpenCode configures MCP servers in `opencode.json` under the top-level `mcp` object rather than via the plugin API. This folder ships:
 
-- `opencode.json` — a ready-to-merge MCP entry that spawns `remindb serve` over stdio.
+- `opencode.json` — a ready-to-merge MCP entry that spawns `remindb bridge` over stdio.
 - `plugin.ts` — a minimal OpenCode plugin stub so the bundle can be distributed as an npm package for users who prefer that path.
 
 ## Installation
 
 ### 1. Install the remindb binary
 
-It needs to be on `$PATH`:
+It needs to be on `$PATH`. Until this fork publishes releases, build it from source:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/radimsem/remindb/main/install.sh | bash
+git clone https://github.com/special-place-administrator/remindb-Local-Hub.git
+cd remindb-Local-Hub
+go test ./...
+go build -o ~/.local/bin/remindb ./cmd/remindb
 ```
 
 On Windows:
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/radimsem/remindb/main/install.ps1 | iex
+git clone https://github.com/special-place-administrator/remindb-Local-Hub.git
+cd remindb-Local-Hub
+go test ./...
+go build -o .\remindb.exe .\cmd\remindb
+$installDir = "$env:LOCALAPPDATA\Programs\remindb\bin"
+New-Item -ItemType Directory -Force -Path $installDir | Out-Null
+Copy-Item .\remindb.exe "$installDir\remindb.exe" -Force
 ```
 
 Verify:
@@ -44,7 +53,7 @@ Drop a `.remindb.ignore` at the workspace root if you need to exclude noise (bui
 
 ### 3. Configure opencode.json
 
-`remindb serve` reads `REMINDB_DB` and `REMINDB_SOURCE` for its `--db` and `--source` flags. The cleanest place to set them for OpenCode is the `environment` object on the `mcp.remindb` entry — OpenCode passes it straight to the spawned subprocess without touching your shell env. The full config looks like this:
+`remindb bridge` reads `REMINDB_DB` and `REMINDB_SOURCE` for its `--db` and `--source` flags, then starts or connects to one singleton local `remindb serve --listen` process. The cleanest place to set them for OpenCode is the `environment` object on the `mcp.remindb` entry — OpenCode passes it straight to the spawned subprocess without touching your shell env. The full config looks like this:
 
 ```json
 {
@@ -52,10 +61,11 @@ Drop a `.remindb.ignore` at the workspace root if you need to exclude noise (bui
     "mcp": {
         "remindb": {
             "type": "local",
-            "command": ["remindb", "serve"],
+            "command": ["remindb", "bridge"],
             "environment": {
                 "REMINDB_DB": "{env:HOME}/.cache/remindb/my-project.db",
-                "REMINDB_SOURCE": "{env:HOME}/code/my-project"
+                "REMINDB_SOURCE": "{env:HOME}/code/my-project",
+                "REMINDB_RESCAN_INTERVAL": "60s"
             },
             "enabled": true
         }
@@ -68,7 +78,7 @@ Pick one install path:
 **Project-level** (recommended — one workspace per repo):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/radimsem/remindb/main/plugins/opencode/opencode.json \
+curl -fsSL https://raw.githubusercontent.com/special-place-administrator/remindb-Local-Hub/main/plugins/opencode/opencode.json \
     -o opencode.json
 ```
 
@@ -76,7 +86,7 @@ curl -fsSL https://raw.githubusercontent.com/radimsem/remindb/main/plugins/openc
 
 ```bash
 mkdir -p ~/.config/opencode
-curl -fsSL https://raw.githubusercontent.com/radimsem/remindb/main/plugins/opencode/opencode.json \
+curl -fsSL https://raw.githubusercontent.com/special-place-administrator/remindb-Local-Hub/main/plugins/opencode/opencode.json \
     -o ~/.config/opencode/opencode.json
 ```
 
@@ -84,15 +94,7 @@ The bundled file ships only the bare MCP entry — open it after curling and add
 
 Heads up: OpenCode only expands `{env:VARIABLE_NAME}` in config values — shell-style `$HOME` or `${HOME}` is treated as a literal string and won't work. Swap the paths for a different workspace (e.g., `{env:HOME}/notes` + `{env:HOME}/.cache/remindb/notes.db`) whenever you want OpenCode to read a different tree. Per-project is recommended so each workspace carries its own DB and source paths — OpenCode reads `opencode.json` on session start, so launching a fresh session from the new directory is enough to swap configs.
 
-**Optional — npm-distributed plugin stub.** If you want the bundle to show up in OpenCode's plugin list, reference the npm package from the same `opencode.json`:
-
-```json
-{
-    "plugin": ["@radimsem/remindb-opencode"]
-}
-```
-
-OpenCode runs `bun install` at startup to resolve the dependency.
+**Optional — npm-distributed plugin stub.** Local Hub does not publish an npm package yet. Do not use `@radimsem/remindb-opencode` if you need `remindb bridge`; that package belongs to upstream remindb.
 
 **Prefer a shell-inherited env?** Point the two values at your own env vars via the same substitution:
 

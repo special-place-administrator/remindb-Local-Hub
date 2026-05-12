@@ -1,10 +1,10 @@
 # remindb for Claude Code
 
-Drops [remindb](https://github.com/radimsem/remindb) into Claude Code as an MCP server. The agent picks up the full `Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
+Drops [remindb Local Hub](https://github.com/special-place-administrator/remindb-Local-Hub) into Claude Code as an MCP server. The agent picks up the full `Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
 
 ## How it works
 
-Claude Code loads `.claude-plugin/plugin.json` as the plugin manifest and merges `.mcp.json` into its effective MCP server list. When Claude Code starts with the plugin enabled, it spawns `remindb serve` over stdio. All the tool logic lives in the Go binary; the plugin is a thin wrapper.
+Claude Code loads `.claude-plugin/plugin.json` as the plugin manifest and merges `.mcp.json` into its effective MCP server list. When Claude Code starts with the plugin enabled, it spawns `remindb bridge` over stdio. The bridge connects to one singleton local `remindb serve --listen` process so several agents can share the same `.db` safely.
 
 Tools are namespaced, so `MemoryFetch` shows up as `remindb__MemoryFetch` in the tool list.
 
@@ -12,16 +12,25 @@ Tools are namespaced, so `MemoryFetch` shows up as `remindb__MemoryFetch` in the
 
 ### 1. Install the remindb binary
 
-It needs to be on `$PATH`:
+It needs to be on `$PATH`. Until this fork publishes releases, build it from source:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/radimsem/remindb/main/install.sh | bash
+git clone https://github.com/special-place-administrator/remindb-Local-Hub.git
+cd remindb-Local-Hub
+go test ./...
+go build -o ~/.local/bin/remindb ./cmd/remindb
 ```
 
 On Windows:
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/radimsem/remindb/main/install.ps1 | iex
+git clone https://github.com/special-place-administrator/remindb-Local-Hub.git
+cd remindb-Local-Hub
+go test ./...
+go build -o .\remindb.exe .\cmd\remindb
+$installDir = "$env:LOCALAPPDATA\Programs\remindb\bin"
+New-Item -ItemType Directory -Force -Path $installDir | Out-Null
+Copy-Item .\remindb.exe "$installDir\remindb.exe" -Force
 ```
 
 Verify:
@@ -57,11 +66,12 @@ The same `.remindb.ignore` is honored by `serve`'s background rescan and the `Me
 
 ### 3. Point remindb at your workspace
 
-`remindb serve` reads `REMINDB_DB` and `REMINDB_SOURCE` as fallbacks for its `--db` and `--source` flags. The bundled `.mcp.json` declares both as `${VAR}` passthroughs into the spawned subprocess, so export them in the shell **before launching Claude Code with the plugin enabled** — otherwise the first activation falls back to a stray `memory.db` in cwd:
+`remindb bridge` reads `REMINDB_DB` and `REMINDB_SOURCE` as fallbacks for its `--db` and `--source` flags. The bundled `.mcp.json` declares both as `${VAR}` passthroughs into the spawned subprocess, so export them in the shell **before launching Claude Code with the plugin enabled** — otherwise the first activation falls back to a stray `memory.db` in cwd:
 
 ```bash
 export REMINDB_DB=$HOME/.cache/remindb/claude.db
 export REMINDB_SOURCE=$HOME/.claude/projects
+export REMINDB_RESCAN_INTERVAL=60s
 ```
 
 Stick them in `~/.bashrc` / `~/.zshrc` / your fish equivalent to make the mapping permanent, or scope them to a single session if you want to switch workspaces between runs. Undefined `${VAR}` references resolve to empty strings, which is what triggers the cwd fallback.
@@ -70,18 +80,13 @@ Stick them in `~/.bashrc` / `~/.zshrc` / your fish equivalent to make the mappin
 
 Pick one:
 
-**From the marketplace** (recommended):
-
-```
-/plugin marketplace add radimsem/remindb
-/plugin install remindb@remindb
-```
-
-**Local checkout** (if you're hacking on the plugin):
+**Local checkout**:
 
 ```bash
 claude --plugin-dir ./plugins/claude-code
 ```
+
+There is no Local Hub marketplace package yet. Do not install `radimsem/remindb` from the marketplace if you need `remindb bridge`; that installs the upstream stdio-only server config.
 
 Either way, confirm the server is connected:
 
@@ -106,7 +111,7 @@ Re-run whenever a file changes.
 
 ## Configuration
 
-The plugin itself has no runtime options. `remindb serve` resolves its DB and source paths from `REMINDB_DB` and `REMINDB_SOURCE` at launch.
+The plugin itself has no runtime options. `remindb bridge` resolves its DB and source paths from `REMINDB_DB` and `REMINDB_SOURCE` at launch, then starts or connects to the singleton local server.
 
 ## Tools exposed
 

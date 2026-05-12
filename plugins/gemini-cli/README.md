@@ -1,10 +1,10 @@
 # remindb for Gemini CLI
 
-Drops [remindb](https://github.com/radimsem/remindb) into Gemini CLI as an MCP server. The agent picks up the full `remindb__Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
+Drops [remindb Local Hub](https://github.com/special-place-administrator/remindb-Local-Hub) into Gemini CLI as an MCP server. The agent picks up the full `remindb__Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
 
 ## How it works
 
-The extension ships a `gemini-extension.json` with an inlined `mcpServers` entry. On activation, Gemini CLI spawns `remindb serve` over stdio and merges its tools into the session.
+The extension ships a `gemini-extension.json` with an inlined `mcpServers` entry. On activation, Gemini CLI spawns `remindb bridge` over stdio and merges its tools into the session. The bridge connects to one singleton local `remindb serve --listen` process so several agents can share the same `.db` safely.
 
 `GEMINI.md` ships alongside the manifest as context for the model when the extension is active.
 
@@ -12,16 +12,25 @@ The extension ships a `gemini-extension.json` with an inlined `mcpServers` entry
 
 ### 1. Install the remindb binary
 
-It needs to be on `$PATH`:
+It needs to be on `$PATH`. Until this fork publishes releases, build it from source:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/radimsem/remindb/main/install.sh | bash
+git clone https://github.com/special-place-administrator/remindb-Local-Hub.git
+cd remindb-Local-Hub
+go test ./...
+go build -o ~/.local/bin/remindb ./cmd/remindb
 ```
 
 On Windows:
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/radimsem/remindb/main/install.ps1 | iex
+git clone https://github.com/special-place-administrator/remindb-Local-Hub.git
+cd remindb-Local-Hub
+go test ./...
+go build -o .\remindb.exe .\cmd\remindb
+$installDir = "$env:LOCALAPPDATA\Programs\remindb\bin"
+New-Item -ItemType Directory -Force -Path $installDir | Out-Null
+Copy-Item .\remindb.exe "$installDir\remindb.exe" -Force
 ```
 
 Verify:
@@ -48,6 +57,7 @@ The extension reads two env vars to find your workspace: `REMINDB_SOURCE` (the d
 ```bash
 export REMINDB_DB=$HOME/.cache/remindb/my-project.db
 export REMINDB_SOURCE=$HOME/code/my-project
+export REMINDB_RESCAN_INTERVAL=60s
 ```
 
 Add them to your shell rc (`~/.bashrc`, `~/.zshrc`, fish config) to make it permanent, or set them per-session if you switch between workspaces.
@@ -57,23 +67,23 @@ Add them to your shell rc (`~/.bashrc`, `~/.zshrc`, fish config) to make it perm
 `gemini extensions install` accepts a GitHub URL or a local path, but its URL form has no subdirectory selector. The plugin lives at `plugins/gemini-cli/` inside the remindb repo, so clone first and install from that subdirectory:
 
 ```bash
-git clone https://github.com/radimsem/remindb.git ~/code/remindb
-gemini extensions install ~/code/remindb/plugins/gemini-cli
+git clone https://github.com/special-place-administrator/remindb-Local-Hub.git ~/code/remindb-Local-Hub
+gemini extensions install ~/code/remindb-Local-Hub/plugins/gemini-cli
 ```
 
 Pin to a release tag:
 
 ```bash
-git -C ~/code/remindb checkout v0.1.0
-gemini extensions install ~/code/remindb/plugins/gemini-cli
+git -C ~/code/remindb-Local-Hub checkout main
+gemini extensions install ~/code/remindb-Local-Hub/plugins/gemini-cli
 ```
 
 Update later with `git pull` and a re-install (local-path installs aren't tracked by `gemini extensions update`):
 
 ```bash
-git -C ~/code/remindb pull
+git -C ~/code/remindb-Local-Hub pull
 gemini extensions uninstall remindb
-gemini extensions install ~/code/remindb/plugins/gemini-cli
+gemini extensions install ~/code/remindb-Local-Hub/plugins/gemini-cli
 ```
 
 Confirm the server is connected:

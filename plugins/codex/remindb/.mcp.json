@@ -3,7 +3,7 @@
         "remindb": {
             "command": "remindb",
             "args": [
-                "serve"
+                "bridge"
             ],
             "env": {}
         }

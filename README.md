@@ -11,13 +11,26 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/radimsem/remindb/actions/workflows/ci.yml"><img src="https://github.com/radimsem/remindb/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI" /></a>
-  <a href="https://github.com/radimsem/remindb/releases/latest"><img src="https://img.shields.io/github/v/release/radimsem/remindb?label=release&color=00ADD8" alt="Latest release" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/radimsem/remindb?color=blue" alt="License" /></a>
-  <img src="https://img.shields.io/github/go-mod/go-version/radimsem/remindb" alt="Go version" />
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/special-place-administrator/remindb-Local-Hub?color=blue" alt="License" /></a>
+  <img src="https://img.shields.io/github/go-mod/go-version/special-place-administrator/remindb-Local-Hub" alt="Go version" />
 </p>
 
 ---
+
+## Local Hub fork
+
+This fork keeps upstream [`radimsem/remindb`](https://github.com/radimsem/remindb) intact in spirit, but adds **Local Hub mode** for Windows and multi-agent workstations.
+
+The original `remindb serve` command is stdio-first: each MCP client normally starts its own server process. That is fine for one terminal, but it is the wrong topology when Claude Code, Codex, Gemini, and other agents all point at the same SQLite database. Local Hub mode runs exactly one DB-owning server and lets every MCP client connect through a tiny stdio bridge.
+
+What this fork adds:
+
+- `remindb serve --listen 127.0.0.1:39291` for a singleton local MCP server.
+- `remindb bridge` so existing stdio MCP clients can connect to that singleton server.
+- FTS5 query hardening for real vault terms such as `three-tier`, `LR-2026-...`, `NEAR(three-tier stack)`, and `three-tier*`.
+- Windows path-prefix compatibility so the test suite and path hashing behave correctly on Windows.
+
+Security boundary: Local Hub is for localhost. MCP has no auth here; do not bind `--listen` to a public interface.
 
 <p align="center">
   <img src="assets/arch.svg" alt="remindb architecture" width="100%" />
@@ -65,42 +78,41 @@ A fresh compile starts every node at `temp=0.50`. The spread above is what an ag
 
 **FTS5 search, not grep.** Search runs on SQLite's FTS5 virtual table, built at write time with a porter tokenizer over labels, content, and types. `MemorySearch` returns ranked anchors in milliseconds — no file rescans, no regex timeouts — and trims to whatever token budget you pass. Ask for 500 tokens of matches, get exactly 500.
 
-**Portable by design.** The whole memory is one `.db` file. Copy it to another machine, hand it to another agent, commit it into a repo, sync it across devices. No server, no daemon, no external state. Any MCP-capable agent — Claude Code, Codex, Gemini CLI, OpenCode, OpenClaw — can point `serve` at the same file and share the same knowledge.
+**Portable by design.** The whole memory is one `.db` file. Copy it to another machine, hand it to another agent, commit it into a repo, sync it across devices. Upstream stdio mode lets one MCP-capable agent point `serve` at the file directly. Local Hub mode adds a localhost singleton so Claude Code, Codex, Gemini CLI, OpenCode, OpenClaw, and similar harnesses can share one local DB owner through `bridge`.
 
 ## Install
 
-### One-line install
-
-**Linux / macOS:**
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/radimsem/remindb/main/install.sh | bash
-```
-
-By default the binary lands at `~/.local/bin/remindb`. Pick a different prefix:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/radimsem/remindb/main/install.sh | bash -s -- --prefix ~/.cargo
-```
-
-**Windows (PowerShell 5.1+):**
-
-```powershell
-iwr -useb https://raw.githubusercontent.com/radimsem/remindb/main/install.ps1 | iex
-```
-
-Lands at `%LOCALAPPDATA%\Programs\remindb\bin\remindb.exe`. Override with `-Prefix`:
-
-```powershell
-./install.ps1 -Prefix C:\tools\remindb
-```
+There are no Local Hub release installers yet. Build from source for now. Do not use upstream `radimsem/remindb` one-line installers if you need `remindb bridge`; upstream releases do not include Local Hub mode.
 
 ### From source (Go 1.26+)
 
+Linux / macOS:
+
 ```bash
-git clone https://github.com/radimsem/remindb.git
-cd remindb
+git clone https://github.com/special-place-administrator/remindb-Local-Hub.git
+cd remindb-Local-Hub
+go test ./...
 go build -o ~/.local/bin/remindb ./cmd/remindb
+```
+
+Windows PowerShell:
+
+```powershell
+git clone https://github.com/special-place-administrator/remindb-Local-Hub.git
+cd remindb-Local-Hub
+go test ./...
+go build -o .\remindb.exe .\cmd\remindb
+
+$installDir = "$env:LOCALAPPDATA\Programs\remindb\bin"
+New-Item -ItemType Directory -Force -Path $installDir | Out-Null
+Copy-Item .\remindb.exe "$installDir\remindb.exe" -Force
+
+# Add once if it is not already on PATH.
+[Environment]::SetEnvironmentVariable(
+  "Path",
+  [Environment]::GetEnvironmentVariable("Path", "User") + ";$installDir",
+  "User"
+)
 ```
 
 Verify:
@@ -108,6 +120,154 @@ Verify:
 ```bash
 remindb --version
 ```
+
+Open a new terminal after changing PATH on Windows.
+
+### Create a database
+
+Choose one source directory and one database path. The source is the authored corpus your agents should query: a docs repo, notes directory, Obsidian vault, or agent memory folder.
+
+Linux / macOS:
+
+```bash
+mkdir -p ~/.cache/remindb
+remindb compile /absolute/path/to/notes --db ~/.cache/remindb/notes.db
+```
+
+Windows PowerShell:
+
+```powershell
+$source = "C:\absolute\path\to\notes"
+$db = "$env:LOCALAPPDATA\remindb\notes.db"
+New-Item -ItemType Directory -Force -Path (Split-Path $db) | Out-Null
+remindb compile $source --db $db
+```
+
+Optional but recommended: put a `.remindb.ignore` file at the source root to exclude session logs, dependency folders, build outputs, caches, secrets, and generated files. The same ignore file is honored by `compile`, the background rescan loop, and `MemoryCompile`.
+
+### Configure MCP clients
+
+For Local Hub, every MCP client should spawn `remindb bridge`, not `remindb serve`. The bridge starts one singleton local server if needed:
+
+```text
+client stdio -> remindb bridge -> 127.0.0.1:39291 -> one remindb serve --listen process -> one .db
+```
+
+Use the same `--addr`, `--db`, and `--source` for every agent that should share the database.
+
+#### Claude Code
+
+User-level config is usually `~/.claude.json` on Linux / macOS and `%USERPROFILE%\.claude.json` on Windows. Add or replace the server entry:
+
+```json
+{
+  "mcpServers": {
+    "remindb": {
+      "type": "stdio",
+      "command": "remindb",
+      "args": [
+        "bridge",
+        "--addr", "127.0.0.1:39291",
+        "--db", "/absolute/path/to/notes.db",
+        "--source", "/absolute/path/to/notes",
+        "--rescan-interval", "60s"
+      ],
+      "env": {}
+    }
+  }
+}
+```
+
+Windows paths are fine, but use forward slashes or escaped backslashes in JSON:
+
+```json
+"--db", "C:/Users/you/AppData/Local/remindb/notes.db",
+"--source", "C:/Users/you/Documents/notes"
+```
+
+Restart Claude Code and run `/mcp`; `remindb` should show the full `Memory*` tool suite.
+
+#### Codex
+
+Add this to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.remindb]
+command = "remindb"
+args = [
+  "bridge",
+  "--addr", "127.0.0.1:39291",
+  "--db", "/absolute/path/to/notes.db",
+  "--source", "/absolute/path/to/notes",
+  "--rescan-interval", "60s"
+]
+```
+
+Windows example:
+
+```toml
+[mcp_servers.remindb]
+command = "C:/Users/you/AppData/Local/Programs/remindb/bin/remindb.exe"
+args = [
+  "bridge",
+  "--addr", "127.0.0.1:39291",
+  "--db", "C:/Users/you/AppData/Local/remindb/notes.db",
+  "--source", "C:/Users/you/Documents/notes",
+  "--rescan-interval", "60s"
+]
+```
+
+Restart Codex and check `/mcp` in the TUI.
+
+#### Gemini CLI
+
+Gemini extensions can use the bundled `plugins/gemini-cli/` extension, which now launches `remindb bridge`. Set the DB and source before launching Gemini:
+
+```bash
+export REMINDB_DB=/absolute/path/to/notes.db
+export REMINDB_SOURCE=/absolute/path/to/notes
+export REMINDB_RESCAN_INTERVAL=60s
+git clone https://github.com/special-place-administrator/remindb-Local-Hub.git ~/code/remindb-Local-Hub
+gemini extensions install ~/code/remindb-Local-Hub/plugins/gemini-cli
+gemini mcp list
+```
+
+On Windows PowerShell:
+
+```powershell
+[Environment]::SetEnvironmentVariable("REMINDB_DB", "C:/Users/you/AppData/Local/remindb/notes.db", "User")
+[Environment]::SetEnvironmentVariable("REMINDB_SOURCE", "C:/Users/you/Documents/notes", "User")
+[Environment]::SetEnvironmentVariable("REMINDB_RESCAN_INTERVAL", "60s", "User")
+gemini extensions install C:\path\to\remindb-Local-Hub\plugins\gemini-cli
+gemini mcp list
+```
+
+Open a new terminal after setting user environment variables.
+
+#### Generic stdio MCP harness
+
+Any MCP client that accepts a stdio command should use this shape:
+
+```json
+{
+  "mcpServers": {
+    "remindb": {
+      "type": "stdio",
+      "command": "remindb",
+      "args": [
+        "bridge",
+        "--addr", "127.0.0.1:39291",
+        "--db", "/absolute/path/to/notes.db",
+        "--source", "/absolute/path/to/notes",
+        "--rescan-interval", "60s"
+      ],
+      "env": {}
+    }
+  }
+}
+```
+
+Do not configure multiple clients to run `remindb serve --db same.db`. `serve` owns the database; `bridge` is what clients spawn.
 
 ## How it's put together
 
@@ -127,11 +287,12 @@ Two phases, one SQLite file in between. The compiler turns source files into ver
 
 ## CLI
 
-Five subcommands, one shared flag (`--db`). Skip `--db` on a directory and remindb derives `./<dirname>.db` automatically.
+Six subcommands, one shared flag (`--db`). Skip `--db` on a directory and remindb derives `./{dirname}.db` automatically.
 
 ```
 remindb compile <path>   Ingest files or a directory into the database
 remindb serve            Start the MCP server (stdio)
+remindb bridge           Bridge stdio MCP clients to a singleton local server
 remindb inspect          Dump DB stats; optionally render the node tree or file list
 remindb bench            Measure token savings vs. raw-file baselines
 remindb update           Reinstall remindb by re-running the install script
@@ -206,6 +367,7 @@ Starts the MCP server on stdio. With `--source` set, remindb runs an initial com
 ```bash
 remindb serve --db ./notes.db --source ./notes
 remindb serve --db ./notes.db --source ./notes --rescan-interval 30s -v
+remindb serve --listen 127.0.0.1:39291 --db ./notes.db --source ./notes
 ```
 
 | Flag | Env | Purpose |
@@ -213,7 +375,28 @@ remindb serve --db ./notes.db --source ./notes --rescan-interval 30s -v
 | `--db` | `REMINDB_DB` | Database file. |
 | `--source` | `REMINDB_SOURCE` | Source directory to watch and incrementally recompile. |
 | `--rescan-interval` | `REMINDB_RESCAN_INTERVAL` | e.g. `30s`, `5m`. `0` keeps the tracker's default. |
+| `--listen` | — | Local TCP address for multi-client MCP sessions. Empty keeps stdio mode. |
 | `-v, --verbose` | — | Debug-level logs. Default is info. |
+
+### `bridge`
+
+Starts a stdio MCP adapter that connects to a singleton local `serve --listen` process. If the singleton is not already running, `bridge` starts it and then connects.
+
+Use this in MCP client configs when several agents or terminals share the same `.db`:
+
+```bash
+remindb bridge --addr 127.0.0.1:39291 --db ./notes.db --source ./notes --rescan-interval 60s
+```
+
+| Flag | Env | Purpose |
+|------|-----|---------|
+| `--db` | `REMINDB_DB` | Database file owned by the singleton server. |
+| `--source` | `REMINDB_SOURCE` | Source directory passed to the singleton server if it must be started. |
+| `--rescan-interval` | `REMINDB_RESCAN_INTERVAL` | Rescan interval passed to the singleton server if it must be started. |
+| `--addr` | `REMINDB_BRIDGE_ADDR` | Local singleton address. Default: `127.0.0.1:39291`. |
+| `--startup-timeout` | — | How long the bridge waits for the singleton to become reachable. |
+
+Do not configure every MCP client to run `remindb serve --db same.db`. Use `bridge` for clients and let one local server own the database.
 
 ### `inspect`
 
@@ -251,7 +434,7 @@ remindb bench \
 
 ### `update`
 
-Reinstalls remindb in place by re-running the official install script. The path it picks matches the install commands shown above — `install.sh` piped to `bash` on Linux / macOS, `install.ps1` piped to PowerShell on Windows.
+Reinstalls remindb in place by re-running the official upstream install script. Until Local Hub publishes its own releases/installers, do not use `remindb update` if you need `bridge`; rebuild from this fork instead.
 
 ```bash
 remindb update
@@ -297,7 +480,7 @@ For any other MCP-capable agent, add this to its MCP config by hand:
     "remindb": {
       "type": "stdio",
       "command": "remindb",
-      "args": ["serve", "--db", "/absolute/path/to/memory.db", "--source", "/absolute/path/to/notes"],
+      "args": ["bridge", "--addr", "127.0.0.1:39291", "--db", "/absolute/path/to/memory.db", "--source", "/absolute/path/to/notes", "--rescan-interval", "60s"],
       "env": {}
     }
   }

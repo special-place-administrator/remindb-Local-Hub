@@ -3,11 +3,12 @@
         "remindb": {
             "command": "remindb",
             "args": [
-                "serve"
+                "bridge"
             ],
             "env": {
                 "REMINDB_DB": "${REMINDB_DB}",
-                "REMINDB_SOURCE": "${REMINDB_SOURCE}"
+                "REMINDB_SOURCE": "${REMINDB_SOURCE}",
+                "REMINDB_RESCAN_INTERVAL": "${REMINDB_RESCAN_INTERVAL}"
             }
         }
     }

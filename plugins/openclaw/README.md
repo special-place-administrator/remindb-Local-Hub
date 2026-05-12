@@ -1,10 +1,10 @@
 # remindb for OpenClaw
 
-Drops [remindb](https://github.com/radimsem/remindb) into OpenClaw as an MCP server. The agent picks up the full `remindb__Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
+Drops [remindb Local Hub](https://github.com/special-place-administrator/remindb-Local-Hub) into OpenClaw as an MCP server. The agent picks up the full `remindb__Memory*` tool suite, backed by a compiled SQLite view of whatever workspace you point it at.
 
 ## How it works
 
-OpenClaw splits plugin registration from MCP server wiring. The plugin (`index.ts` + `openclaw.plugin.json`) declares itself as an extension; the MCP server is registered separately at the gateway level via `openclaw mcp set`. When the gateway starts, OpenClaw spawns `remindb serve` over stdio. All tool logic lives in the Go binary; the plugin is a thin wrapper.
+OpenClaw splits plugin registration from MCP server wiring. The plugin (`index.ts` + `openclaw.plugin.json`) declares itself as an extension; the MCP server is registered separately at the gateway level via `openclaw mcp set`. When the gateway starts, OpenClaw spawns `remindb bridge` over stdio. The bridge connects to one singleton local `remindb serve --listen` process so several agents can share the same `.db` safely.
 
 Tools are namespaced by OpenClaw on load, so `MemoryFetch` becomes `remindb__MemoryFetch` in the agent's tool list. Each agent's `tools.allow` array in `~/.openclaw/openclaw.json` must include the bare plugin id `"remindb"` — OpenClaw expands it to all `remindb__*` tools at policy time.
 
@@ -12,16 +12,25 @@ Tools are namespaced by OpenClaw on load, so `MemoryFetch` becomes `remindb__Mem
 
 ### 1. Install the remindb binary
 
-It needs to be on `$PATH`:
+It needs to be on `$PATH`. Until this fork publishes releases, build it from source:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/radimsem/remindb/main/install.sh | bash
+git clone https://github.com/special-place-administrator/remindb-Local-Hub.git
+cd remindb-Local-Hub
+go test ./...
+go build -o ~/.local/bin/remindb ./cmd/remindb
 ```
 
 On Windows:
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/radimsem/remindb/main/install.ps1 | iex
+git clone https://github.com/special-place-administrator/remindb-Local-Hub.git
+cd remindb-Local-Hub
+go test ./...
+go build -o .\remindb.exe .\cmd\remindb
+$installDir = "$env:LOCALAPPDATA\Programs\remindb\bin"
+New-Item -ItemType Directory -Force -Path $installDir | Out-Null
+Copy-Item .\remindb.exe "$installDir\remindb.exe" -Force
 ```
 
 Verify:
@@ -71,11 +80,12 @@ Re-run `compile` whenever you want a fresh baseline; `serve` keeps the DB curren
 
 ### 3. Point remindb at your workspace
 
-`remindb serve` reads two env vars as fallbacks for its `--db` and `--source` flags. Export them in the shell **before launching OpenClaw with the plugin enabled** — otherwise the first activation falls back to a stray `memory.db` in cwd:
+`remindb bridge` reads two env vars as fallbacks for its `--db` and `--source` flags. Export them in the shell **before launching OpenClaw with the plugin enabled** — otherwise the first activation falls back to a stray `memory.db` in cwd:
 
 ```bash
 export REMINDB_DB=/absolute/path/to/workspace.db
 export REMINDB_SOURCE=/absolute/path/to/workspace
+export REMINDB_RESCAN_INTERVAL=60s
 ```
 
 Stick them in `~/.bashrc` / `~/.zshrc` / your fish equivalent to make it permanent, or scope to a single session if you want to switch workspaces between runs. Re-export and restart the gateway whenever the agent should target a different workspace.
@@ -85,11 +95,11 @@ Stick them in `~/.bashrc` / `~/.zshrc` / your fish equivalent to make it permane
 Both install paths point at a local checkout, so clone the repo first:
 
 ```bash
-git clone https://github.com/radimsem/remindb.git ~/code/remindb
-cd ~/code/remindb
+git clone https://github.com/special-place-administrator/remindb-Local-Hub.git ~/code/remindb-Local-Hub
+cd ~/code/remindb-Local-Hub
 ```
 
-Pin to a release tag if you want a stable version: `git -C ~/code/remindb checkout v0.1.0`.
+Pin to a commit if you want a stable version.
 
 Via OpenClaw CLI:
 
@@ -107,7 +117,7 @@ cp plugins/openclaw/index.ts plugins/openclaw/openclaw.plugin.json ~/.openclaw/e
 ### 5. Register the MCP server and restart the gateway
 
 ```bash
-openclaw mcp set remindb '{"command":"remindb","args":["serve"]}'
+openclaw mcp set remindb '{"command":"remindb","args":["bridge"]}'
 openclaw gateway restart
 ```
 
@@ -148,10 +158,10 @@ You can also enable the plugin and pin its config in `openclaw.json`:
 }
 ```
 
-The plugin itself has no runtime options. `remindb serve` resolves its DB and source paths from `REMINDB_DB` and `REMINDB_SOURCE` at launch; pass explicit `--db` / `--source` flags through `openclaw mcp set` if you need per-server pinning:
+The plugin itself has no runtime options. `remindb bridge` resolves its DB and source paths from `REMINDB_DB` and `REMINDB_SOURCE` at launch; pass explicit `--db` / `--source` flags through `openclaw mcp set` if you need per-server pinning:
 
 ```bash
-openclaw mcp set remindb '{"command":"remindb","args":["serve","--db","/abs/path/workspace.db","--source","/abs/path/workspace"]}'
+openclaw mcp set remindb '{"command":"remindb","args":["bridge","--addr","127.0.0.1:39291","--db","/abs/path/workspace.db","--source","/abs/path/workspace","--rescan-interval","60s"]}'
 ```
 
 ## Tools exposed
