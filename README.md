@@ -110,6 +110,74 @@ A fresh compile starts every node at `temp=0.50`. The spread above is what an ag
 
 **Portable by design.** The whole memory is one `.db` file. Copy it to another machine, hand it to another agent, commit it into a repo, sync it across devices. Upstream stdio mode lets one MCP-capable agent point `serve` at the file directly. ReminDB-Local-Hub adds a localhost singleton so Claude Code, Codex, Gemini CLI, OpenCode, OpenClaw, and similar harnesses can share one local DB owner through `bridge`.
 
+### Memory logic
+
+```mermaid
+flowchart TB
+    subgraph Ingest["Ingest path"]
+        Source["Source files: Markdown / JSON / YAML / TOON"]
+        Parse["Parser builds ContextNode tree"]
+        Transform["Transformer adds IDs, labels, tokens, hashes"]
+        Diff["Diff engine compares against previous snapshot"]
+        Emit["Emitter writes one transaction"]
+    end
+
+    subgraph DB["SQLite memory database"]
+        Nodes[("nodes: current tree")]
+        FTS[("nodes_fts: searchable text")]
+        Snapshots[("snapshots + diffs: version history")]
+        Temps[("temperature + access counters")]
+    end
+
+    subgraph Runtime["MCP runtime"]
+        Tree["MemoryTree: cheap orientation"]
+        Search["MemorySearch: FTS query + token budget"]
+        Fetch["MemoryFetch: anchor + ancestors + children"]
+        Delta["MemoryDelta: changes since snapshot"]
+        History["MemoryHistory: versions for one node"]
+        Write["MemoryWrite: add or replace content"]
+        Summarize["MemorySummarize: compact cold node"]
+        Compile["MemoryCompile: re-ingest changed files"]
+    end
+
+    subgraph Temperature["Use-driven ranking"]
+        Rank["rank = text relevance weighted by temperature"]
+        Boost["reads boost touched nodes"]
+        Decay["timer decays all nodes"]
+        Cold["cold nodes trigger notification"]
+    end
+
+    Agent["Agent"] --> Tree
+    Agent --> Search
+    Agent --> Fetch
+    Agent --> Delta
+    Agent --> History
+    Agent --> Write
+    Agent --> Summarize
+    Agent --> Compile
+
+    Source --> Parse --> Transform --> Diff --> Emit
+    Compile --> Parse
+    Write --> StoreOp["Store.OpMu: serialize writes"]
+    Summarize --> StoreOp
+    StoreOp --> Emit
+
+    Emit --> Nodes
+    Emit --> Snapshots
+    Nodes --> FTS
+    Nodes --> Temps
+
+    Tree --> Nodes
+    Search --> FTS --> Rank --> Fetch
+    Fetch --> Nodes
+    Fetch --> Boost --> Temps
+    Delta --> Snapshots
+    History --> Snapshots
+
+    Temps --> Rank
+    Temps --> Decay --> Cold --> Agent
+```
+
 ## Install
 
 There are no ReminDB-Local-Hub release installers yet. Build from source for now. Do not use upstream one-line installers if you need `remindb bridge`; upstream releases do not include ReminDB-Local-Hub.
