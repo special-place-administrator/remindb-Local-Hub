@@ -22,46 +22,26 @@ What ReminDB-Local-Hub adds:
 - Windows path-prefix compatibility so the test suite and path hashing behave correctly on Windows.
 
 ```mermaid
-flowchart LR
-    subgraph Agents["Agent harnesses"]
-        Claude["Claude Code"]
-        Codex["Codex"]
-        Gemini["Gemini CLI"]
-        Other["OpenCode / OpenClaw / other MCP clients"]
-    end
+flowchart TD
+    Clients["Agent harnesses<br/>Claude Code, Codex, Gemini CLI<br/>OpenCode, OpenClaw, other MCP clients"]
+    Bridge["Each client starts<br/>remindb bridge"]
+    Listener["Local listener<br/>127.0.0.1:39291"]
+    Server["One DB-owning server<br/>remindb serve --listen"]
+    Tools["Memory* MCP tools"]
+    Lock["Serialized writes<br/>one Store.OpMu"]
+    DB[("SQLite memory DB")]
+    Source["Source tree / vault / agent memory"]
+    Rescan["compile + background rescan"]
 
-    subgraph Bridges["Per-client stdio bridge processes"]
-        B1["remindb bridge"]
-        B2["remindb bridge"]
-        B3["remindb bridge"]
-        B4["remindb bridge"]
-    end
-
-    subgraph Hub["ReminDB-Local-Hub"]
-        Listener["127.0.0.1:39291"]
-        Server["singleton remindb serve --listen"]
-        Tools["Memory* MCP tools"]
-        Lock["one write lock"]
-        DB[("SQLite memory DB")]
-    end
-
-    Source["Source tree / vault / agent memory"] --> Compiler["compile + background rescan"]
-    Compiler --> Server
-
-    Claude -->|stdio| B1
-    Codex -->|stdio| B2
-    Gemini -->|stdio| B3
-    Other -->|stdio| B4
-
-    B1 -->|localhost TCP| Listener
-    B2 -->|localhost TCP| Listener
-    B3 -->|localhost TCP| Listener
-    B4 -->|localhost TCP| Listener
-
+    Clients -->|stdio| Bridge
+    Bridge -->|localhost TCP| Listener
     Listener --> Server
     Server --> Tools
     Tools --> Lock
     Lock --> DB
+
+    Source --> Rescan
+    Rescan --> Server
 ```
 
 Security boundary: ReminDB-Local-Hub is for localhost. MCP has no auth here; do not bind `--listen` to a public interface.
@@ -114,68 +94,46 @@ A fresh compile starts every node at `temp=0.50`. The spread above is what an ag
 
 ```mermaid
 flowchart TB
-    subgraph Ingest["Ingest path"]
-        Source["Source files: Markdown / JSON / YAML / TOON"]
-        Parse["Parser builds ContextNode tree"]
-        Transform["Transformer adds IDs, labels, tokens, hashes"]
-        Diff["Diff engine compares against previous snapshot"]
-        Emit["Emitter writes one transaction"]
-    end
+    Source["Source files<br/>Markdown / JSON / YAML / TOON"]
+    Parse["Parser<br/>builds a ContextNode tree"]
+    Transform["Transformer<br/>adds IDs, labels, token counts, hashes"]
+    Diff["Diff engine<br/>compares against previous snapshot"]
+    Emit["Emitter<br/>writes one SQLite transaction"]
+    DB[("SQLite memory DB<br/>nodes + nodes_fts<br/>snapshots + diffs<br/>temperature")]
 
-    subgraph DB["SQLite memory database"]
-        Nodes[("nodes: current tree")]
-        FTS[("nodes_fts: searchable text")]
-        Snapshots[("snapshots + diffs: version history")]
-        Temps[("temperature + access counters")]
-    end
+    Agent["Agent"]
+    Read["Read tools<br/>MemoryTree / Search / Fetch<br/>Delta / History"]
+    Query["Query engine<br/>FTS + tree walk + token budget"]
+    Answer["Trimmed answer<br/>within requested budget"]
+    Boost["Boost touched nodes<br/>hot nodes rank higher"]
 
-    subgraph Runtime["MCP runtime"]
-        Tree["MemoryTree: cheap orientation"]
-        Search["MemorySearch: FTS query + token budget"]
-        Fetch["MemoryFetch: anchor + ancestors + children"]
-        Delta["MemoryDelta: changes since snapshot"]
-        History["MemoryHistory: versions for one node"]
-        Write["MemoryWrite: add or replace content"]
-        Summarize["MemorySummarize: compact cold node"]
-        Compile["MemoryCompile: re-ingest changed files"]
-    end
+    Write["Write tools<br/>MemoryWrite / Summarize / Compile"]
+    StoreOp["Store.OpMu<br/>serialize writes"]
 
-    subgraph Temperature["Use-driven ranking"]
-        Rank["rank = text relevance weighted by temperature"]
-        Boost["reads boost touched nodes"]
-        Decay["timer decays all nodes"]
-        Cold["cold nodes trigger notification"]
-    end
+    Decay["Temperature tick<br/>unused nodes cool down"]
+    Cold["Cold-node notification<br/>suggest MemorySummarize"]
 
-    Agent["Agent"] --> Tree
-    Agent --> Search
-    Agent --> Fetch
-    Agent --> Delta
-    Agent --> History
+    Source --> Parse
+    Parse --> Transform
+    Transform --> Diff
+    Diff --> Emit
+    Emit --> DB
+
+    Agent --> Read
+    Read --> Query
+    DB --> Query
+    Query --> Answer
+    Answer --> Agent
+    Query --> Boost
+    Boost --> DB
+
     Agent --> Write
-    Agent --> Summarize
-    Agent --> Compile
-
-    Source --> Parse --> Transform --> Diff --> Emit
-    Compile --> Parse
-    Write --> StoreOp["Store.OpMu: serialize writes"]
-    Summarize --> StoreOp
+    Write --> StoreOp
     StoreOp --> Emit
 
-    Emit --> Nodes
-    Emit --> Snapshots
-    Nodes --> FTS
-    Nodes --> Temps
-
-    Tree --> Nodes
-    Search --> FTS --> Rank --> Fetch
-    Fetch --> Nodes
-    Fetch --> Boost --> Temps
-    Delta --> Snapshots
-    History --> Snapshots
-
-    Temps --> Rank
-    Temps --> Decay --> Cold --> Agent
+    DB --> Decay
+    Decay --> Cold
+    Cold --> Agent
 ```
 
 ## Install
