@@ -1,6 +1,7 @@
 package transformer
 
 import (
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -15,9 +16,10 @@ func compressPrefix(nodes []*parser.ContextNode, compileRoot string) {
 
 	prefix := compileRoot
 	if prefix != "" {
-		prefix = filepath.Clean(prefix)
-		if !strings.HasSuffix(prefix, string(filepath.Separator)) {
-			prefix += string(filepath.Separator)
+		sep := pathSeparator(prefix)
+		prefix = cleanPath(prefix)
+		if !strings.HasSuffix(prefix, sep) {
+			prefix += sep
 		}
 	} else {
 		prefix = commonDirPrefix(nodes)
@@ -33,10 +35,14 @@ func compressPrefix(nodes []*parser.ContextNode, compileRoot string) {
 }
 
 func commonDirPrefix(nodes []*parser.ContextNode) string {
-	parts := splitPath(filepath.Dir(nodes[0].SourceFile))
+	sep := pathSeparator(nodes[0].SourceFile)
+	parts := splitPath(dirPath(nodes[0].SourceFile), sep)
 
 	for _, n := range nodes[1:] {
-		np := splitPath(filepath.Dir(n.SourceFile))
+		if pathSeparator(n.SourceFile) != sep {
+			return ""
+		}
+		np := splitPath(dirPath(n.SourceFile), sep)
 		parts = commonParts(parts, np)
 
 		if len(parts) == 0 {
@@ -44,21 +50,42 @@ func commonDirPrefix(nodes []*parser.ContextNode) string {
 		}
 	}
 
-	result := strings.Join(parts, string(filepath.Separator))
-	if result == "" || result == "." || result == "/" {
+	result := strings.Join(parts, sep)
+	if result == "" || result == "." || result == "/" || result == `\` {
 		return ""
 	}
 
-	return result + string(filepath.Separator)
+	return result + sep
 }
 
-func splitPath(p string) []string {
-	p = filepath.Clean(p)
+func splitPath(p, sep string) []string {
+	p = cleanPath(p)
 	if p == "." {
 		return nil
 	}
 
-	return strings.Split(p, string(filepath.Separator))
+	return strings.Split(p, sep)
+}
+
+func pathSeparator(p string) string {
+	if strings.Contains(p, "/") && !strings.Contains(p, `\`) {
+		return "/"
+	}
+	return string(filepath.Separator)
+}
+
+func cleanPath(p string) string {
+	if pathSeparator(p) == "/" {
+		return path.Clean(p)
+	}
+	return filepath.Clean(p)
+}
+
+func dirPath(p string) string {
+	if pathSeparator(p) == "/" {
+		return path.Dir(p)
+	}
+	return filepath.Dir(p)
 }
 
 func commonParts(a, b []string) []string {

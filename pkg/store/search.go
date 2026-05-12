@@ -126,11 +126,27 @@ func splitFTSQuery(q string) []string {
 }
 
 func rewriteFTSToken(s string) string {
-	if isPreservedFTSExpression(s) {
+	if strings.HasPrefix(s, `"`) {
+		return s
+	}
+	if strings.HasPrefix(s, "NEAR(") && strings.HasSuffix(s, ")") {
+		return rewriteNearExpression(s)
+	}
+	if strings.HasPrefix(s, "(") && strings.HasSuffix(s, ")") {
+		return rewriteParenthesizedExpression(s)
+	}
+	if rewritten, ok := rewriteColumnExpression(s); ok {
+		return rewritten
+	}
+	if strings.HasSuffix(s, "*") && len(s) > 1 {
+		stem := strings.TrimSuffix(s, "*")
+		if needsFtsQuoting(stem) {
+			return quoteFTSToken(stem) + "*"
+		}
 		return s
 	}
 	if needsFtsQuoting(s) {
-		return `"` + strings.ReplaceAll(s, `"`, `""`) + `"`
+		return quoteFTSToken(s)
 	}
 	return s
 }
@@ -139,12 +155,85 @@ func isFTSOperator(s string) bool {
 	return s == "OR" || s == "AND" || s == "NOT"
 }
 
-func isPreservedFTSExpression(s string) bool {
-	return strings.HasPrefix(s, `"`) ||
-		strings.HasPrefix(s, "NEAR(") ||
-		strings.Contains(s, ":") ||
-		strings.Contains(s, "*") ||
-		strings.Contains(s, "(")
+func rewriteParenthesizedExpression(s string) string {
+	inner := strings.TrimSpace(s[1 : len(s)-1])
+	if inner == "" {
+		return s
+	}
+	return "(" + rewriteFTSExpressionTerms(inner) + ")"
+}
+
+func rewriteNearExpression(s string) string {
+	inner := strings.TrimSpace(s[len("NEAR(") : len(s)-1])
+	if inner == "" {
+		return s
+	}
+
+	terms, distance, hasDistance := splitTopLevelComma(inner)
+	rewritten := "NEAR(" + rewriteFTSExpressionTerms(terms)
+	if hasDistance {
+		rewritten += ", " + distance
+	}
+	return rewritten + ")"
+}
+
+func rewriteColumnExpression(s string) (string, bool) {
+	idx := strings.IndexByte(s, ':')
+	if idx <= 0 || idx == len(s)-1 {
+		return "", false
+	}
+
+	field := s[:idx]
+	if !isFTSColumn(field) {
+		return "", false
+	}
+
+	return field + ":" + rewriteFTSToken(s[idx+1:]), true
+}
+
+func rewriteFTSExpressionTerms(s string) string {
+	tokens := splitFTSQuery(s)
+	rewritten := make([]string, 0, len(tokens))
+	for _, token := range tokens {
+		if isFTSOperator(token) {
+			rewritten = append(rewritten, token)
+			continue
+		}
+		rewritten = append(rewritten, rewriteFTSToken(token))
+	}
+	return strings.Join(rewritten, " ")
+}
+
+func splitTopLevelComma(s string) (before, after string, ok bool) {
+	depth := 0
+	inQuote := false
+	for i := 0; i < len(s); i++ {
+		switch s[i] {
+		case '"':
+			inQuote = !inQuote
+		case '(':
+			if !inQuote {
+				depth++
+			}
+		case ')':
+			if !inQuote && depth > 0 {
+				depth--
+			}
+		case ',':
+			if !inQuote && depth == 0 {
+				return strings.TrimSpace(s[:i]), strings.TrimSpace(s[i+1:]), true
+			}
+		}
+	}
+	return strings.TrimSpace(s), "", false
+}
+
+func isFTSColumn(s string) bool {
+	return s == "label" || s == "content" || s == "node_type"
+}
+
+func quoteFTSToken(s string) string {
+	return `"` + strings.ReplaceAll(s, `"`, `""`) + `"`
 }
 
 func isSpace(b byte) bool {

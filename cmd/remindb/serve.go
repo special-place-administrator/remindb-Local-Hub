@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	remindb "github.com/radimsem/remindb/pkg/mcp"
 	"github.com/radimsem/remindb/pkg/store"
 	"github.com/radimsem/remindb/pkg/temperature"
@@ -20,6 +22,7 @@ var (
 	sourceDir      string
 	rescanInterval time.Duration
 	verbose        bool
+	listenAddr     string
 )
 
 var serveCmd = &cobra.Command{
@@ -32,6 +35,7 @@ func init() {
 	serveCmd.Flags().StringVar(&sourceDir, "source", "", "Source directory to watch for changes (falls back to REMINDB_SOURCE)")
 	serveCmd.Flags().DurationVar(&rescanInterval, "rescan-interval", 0, "Rescan interval (e.g. 30s, 5m); 0 uses default (falls back to REMINDB_RESCAN_INTERVAL)")
 	serveCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Emit debug-level logs (default level is info)")
+	serveCmd.Flags().StringVar(&listenAddr, "listen", "", "TCP listen address for multi-client MCP transport; empty uses stdio")
 	rootCmd.AddCommand(serveCmd)
 }
 
@@ -91,7 +95,7 @@ func runServe(cmd *cobra.Command, _ []string) error {
 
 	g.Go(func() error {
 		defer cancel()
-		return srv.Run(ctx)
+		return runMCPTransport(ctx, srv, logger)
 	})
 	g.Go(func() error {
 		tracker.Run(ctx, func(ctx context.Context, nodes []*store.Node) {
@@ -118,6 +122,66 @@ func runServe(cmd *cobra.Command, _ []string) error {
 	}
 	logger.Info("serve: stopped")
 	return nil
+}
+
+func runMCPTransport(ctx context.Context, srv *remindb.Server, logger *slog.Logger) error {
+	if listenAddr == "" {
+		return srv.Run(ctx)
+	}
+
+	ln, err := net.Listen("tcp", listenAddr)
+	if err != nil {
+		return fmt.Errorf("failed to listen: %s: %w", listenAddr, err)
+	}
+	defer func() { _ = ln.Close() }()
+
+	logger.Info("serve: MCP TCP listener ready", "addr", listenAddr)
+	go func() {
+		<-ctx.Done()
+		_ = ln.Close()
+	}()
+
+	for {
+		conn, err := ln.Accept()
+		if err != nil {
+			if ctx.Err() != nil {
+				return nil
+			}
+			if ne, ok := err.(net.Error); ok && ne.Temporary() {
+				logger.Warn("serve: temporary accept error", "err", err)
+				continue
+			}
+			return fmt.Errorf("failed to accept MCP client: %w", err)
+		}
+
+		go handleMCPConn(ctx, srv, logger, conn)
+	}
+}
+
+func handleMCPConn(ctx context.Context, srv *remindb.Server, logger *slog.Logger, conn net.Conn) {
+	logger.Info("serve: MCP client connected", "remote", conn.RemoteAddr().String())
+
+	session, err := srv.Connect(ctx, &mcpsdk.IOTransport{Reader: conn, Writer: conn})
+	if err != nil {
+		logger.Warn("serve: failed to connect MCP client", "err", err)
+		_ = conn.Close()
+		return
+	}
+
+	done := make(chan error, 1)
+	go func() { done <- session.Wait() }()
+
+	select {
+	case <-ctx.Done():
+		_ = session.Close()
+		err = <-done
+	case err = <-done:
+	}
+
+	if err != nil && ctx.Err() == nil {
+		logger.Warn("serve: MCP client disconnected with error", "err", err)
+	}
+	_ = conn.Close()
 }
 
 func newServeLogger(verbose bool) *slog.Logger {

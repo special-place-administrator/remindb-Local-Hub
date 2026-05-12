@@ -706,6 +706,13 @@ func TestRewriteQuery(t *testing.T) {
 		{"label:snapshot", "label:snapshot"},
 		{"snap*", "snap*"},
 		{"NEAR(a b)", "NEAR(a b)"},
+		{"(three-tier)", `("three-tier")`},
+		{"three-tier*", `"three-tier"*`},
+		{"NEAR(three-tier stack)", `NEAR("three-tier" stack)`},
+		{"NEAR(three-tier stack, 5)", `NEAR("three-tier" stack, 5)`},
+		{"file:foo-bar", `"file:foo-bar"`},
+		{"label:three-tier", `label:"three-tier"`},
+		{"content:(three-tier stack)", `content:("three-tier" stack)`},
 		// Hyphenated and special-char terms are quoted as FTS5 phrases.
 		// Bareword "LR-2026" hits FTS5's column-ref parser: "no such
 		// column: 2026". Quoting forces phrase match against tokens.
