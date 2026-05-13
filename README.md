@@ -411,12 +411,13 @@ Two phases, one SQLite file in between. The compiler turns source files into ver
 
 ## CLI
 
-Six subcommands, one shared flag (`--db`). Skip `--db` on a directory and remindb derives `./{dirname}.db` automatically.
+Seven subcommands, one shared flag (`--db`). Skip `--db` on a directory and remindb derives `./{dirname}.db` automatically.
 
 ```
 remindb compile <path>   Ingest files or a directory into the database
-remindb serve            Start the MCP server (stdio)
+remindb serve            Start the MCP server (stdio or --listen)
 remindb bridge           Bridge stdio MCP clients to a singleton local server
+remindb service          Manage the Windows Service for the singleton (Windows only)
 remindb inspect          Dump DB stats; optionally render the node tree or file list
 remindb bench            Measure token savings vs. raw-file baselines
 remindb update           Reinstall remindb by re-running the install script
@@ -521,6 +522,38 @@ remindb bridge --addr 127.0.0.1:39291 --db ./notes.db --source ./notes --rescan-
 | `--startup-timeout` | — | How long the bridge waits for the singleton to become reachable. |
 
 Do not configure every MCP client to run `remindb serve --db same.db`. Use `bridge` for clients and let one local server own the database.
+
+### `service` (Windows only)
+
+Manage the singleton `remindb serve --listen` process as a Windows Service so it starts at boot, runs windowless under the Service Control Manager, and writes structured logs to a known file path. Sub-subcommands: `install`, `uninstall`, `start`, `stop`, `status`.
+
+```powershell
+# One-time registration (UAC prompt — SCM requires admin):
+remindb --db C:/claude-obsidian/primus-cloud.db service install `
+  --listen 127.0.0.1:39291 `
+  --source C:/claude-obsidian/primus-cloud `
+  --rescan-interval 60s
+
+# Inspect:
+remindb service status
+
+# Stop / start:
+remindb service stop
+remindb service start
+
+# Remove:
+remindb service uninstall
+```
+
+| Flag | Default | Purpose |
+|------|---------|---------|
+| `--listen` | `127.0.0.1:39291` | TCP listen address baked into the service args. |
+| `--source` | (empty) | Source directory baked into the service args. |
+| `--rescan-interval` | `60s` | Rescan interval baked into the service args. |
+| `--start-type` | `auto-delayed` | Service start type: `auto-delayed`, `auto`, `manual`, `disabled`. |
+| `--log-file` | `C:\ProgramData\remindb\service.log` | Where the SCM-spawned `serve` writes its slog output (stdio is not connected for services). |
+
+The installed service uses the SCM dispatch loop (`golang.org/x/sys/windows/svc`) — `Stop` and `Shutdown` signals cancel the serve context cleanly, draining the rescan + tracker goroutines before reporting `Stopped`. After install, all MCP clients should be configured with `remindb bridge --addr 127.0.0.1:39291 ...`; the service owns the DB, the bridges fan out.
 
 ### `inspect`
 
