@@ -1,6 +1,6 @@
 module github.com/special-place-administrator/remindb-Local-Hub
 
-go 1.26.2
+go 1.26.3
 
 require github.com/gomarkdown/markdown v0.0.0-20260412113850-134a5b2cce7f
 
