@@ -88,7 +88,10 @@ try {
 
 	Write-Host "Installing to $binPath..."
 	Expand-Archive -Path $archivePath -DestinationPath $tmpdir -Force
-	Move-Item -Path (Join-Path $tmpdir 'remindb.exe') -Destination $binPath -Force
+	if (Test-Path $binPath) {
+		Remove-Item -Path $binPath -Force
+	}
+	Copy-Item -Path (Join-Path $tmpdir 'remindb.exe') -Destination $binPath -Force
 
 	Write-Host "Installed: $binPath ($tag)"
 
