@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net"
@@ -147,9 +148,8 @@ func runMCPTransport(ctx context.Context, srv *remindb.Server, logger *slog.Logg
 			if ctx.Err() != nil {
 				return nil
 			}
-			if ne, ok := err.(net.Error); ok && ne.Temporary() {
-				logger.Warn("serve: temporary accept error", "err", err)
-				continue
+			if errors.Is(err, net.ErrClosed) {
+				return nil
 			}
 			return fmt.Errorf("failed to accept MCP client: %w", err)
 		}
