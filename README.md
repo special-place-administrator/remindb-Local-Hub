@@ -18,12 +18,21 @@ What ReminDB-Local-Hub adds:
 
 - `remindb serve --listen 127.0.0.1:39291` for a singleton local MCP server.
 - `remindb bridge` so existing stdio MCP clients can connect to that singleton server.
+- `remindb service install/uninstall/start/stop/status` (Windows) — runs the singleton windowless under the Service Control Manager via `golang.org/x/sys/windows/svc`. Auto-delayed start at boot, structured `slog` output to `C:\ProgramData\remindb\service.log`, clean SCM Stop/Shutdown drains the rescan + tracker goroutines before reporting `Stopped`. No third-party wrappers, no VBS, no scheduled tasks.
 - FTS5 query hardening for real vault terms such as `three-tier`, `LR-2026-...`, `NEAR(three-tier stack)`, and `three-tier*`.
 - Windows path-prefix compatibility so the test suite and path hashing behave correctly on Windows.
-- `install.ps1` and `install.sh` installers on the `main` branch root, plus tag-triggered GoReleaser builds; `remindb update` reinstalls in place.
+- `install.ps1` and `install.sh` installers on the `main` branch root with SHA256 verification against the release `checksums.txt`, plus tag-triggered GoReleaser builds for linux / darwin / windows × amd64 / arm64.
+- `remindb update` reinstalls in place: detached install via `CREATE_NO_WINDOW` + `Wait-Process` so the parent can exit and the binary file lock is released; install.ps1 retries the file copy 10 × 500ms and prints an actionable error (with the exact `remindb service stop` command) when the running service holds the binary open; prefers `pwsh.exe` over `powershell.exe` when both are present.
+- `install.ps1` uses `[System.Security.Cryptography.SHA256]` directly so SHA256 verification works in stripped Windows PowerShell 5.1 sessions where `Get-FileHash` is unavailable.
 
 ```mermaid
 flowchart LR
+    subgraph Supervisor["process supervisor"]
+        direction TB
+        SCM["Windows SCM<br/>(remindb service install)<br/>— or systemd / launchd"]
+        Log[/"C:\ProgramData\remindb\service.log"/]
+    end
+
     subgraph Clients["MCP clients"]
         direction TB
         Claude["Claude Code"]
@@ -42,10 +51,10 @@ flowchart LR
         OpenClawBridge["remindb bridge"]
     end
 
-    subgraph Hub["ReminDB-Local-Hub"]
+    subgraph Hub["ReminDB-Local-Hub singleton"]
         direction TB
         Listener["127.0.0.1:39291"]
-        Server["single remindb serve --listen"]
+        Server["single remindb serve --listen<br/>(windowless under SCM)"]
         Tools["Memory* MCP tools"]
         Lock["Store.OpMu write lock"]
         DB[("SQLite memory DB")]
@@ -56,6 +65,9 @@ flowchart LR
         Source["vault / docs / agent memory"]
         Rescan["compile + background rescan"]
     end
+
+    SCM -.->|start / stop / shutdown| Server
+    Server -.->|slog text handler| Log
 
     Claude -->|stdio| ClaudeBridge
     Codex -->|stdio| CodexBridge
