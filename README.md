@@ -10,7 +10,7 @@
 
 ## ReminDB-Local-Hub
 
-ReminDB-Local-Hub makes the `remindb` binary work correctly on Windows and multi-agent workstations.
+ReminDB-Local-Hub makes the `remindb` binary work correctly on Windows and multi-agent workstations. Pre-built releases are published from `v0.1.0` onwards for linux / darwin / windows × amd64 / arm64.
 
 The original `remindb serve` command is stdio-first: each MCP client normally starts its own server process. That is fine for one terminal, but it is the wrong topology when Claude Code, Codex, Gemini, and other agents all point at the same SQLite database. ReminDB-Local-Hub runs exactly one DB-owning server and lets every MCP client connect through a tiny stdio bridge.
 
@@ -20,6 +20,7 @@ What ReminDB-Local-Hub adds:
 - `remindb bridge` so existing stdio MCP clients can connect to that singleton server.
 - FTS5 query hardening for real vault terms such as `three-tier`, `LR-2026-...`, `NEAR(three-tier stack)`, and `three-tier*`.
 - Windows path-prefix compatibility so the test suite and path hashing behave correctly on Windows.
+- `install.ps1` and `install.sh` installers on the `main` branch root, plus tag-triggered GoReleaser builds; `remindb update` reinstalls in place.
 
 ```mermaid
 flowchart LR
@@ -76,6 +77,19 @@ flowchart LR
     Source --> Rescan
     Rescan --> Server
 ```
+
+### Topology choice
+
+The v0.1.0 binary supports two shapes. Both are valid; the right one depends on how many clients share the database.
+
+| Shape | Process model | When to use |
+|---|---|---|
+| **Per-client `serve`** (simpler) | The MCP client spawns its own `remindb serve` on stdio and opens the `.db` directly. SQLite WAL handles multi-process safety, but every additional client duplicates the rescan loop and fragments temperature counters across processes. | 1 client. The simplest possible wiring. |
+| **Singleton `serve --listen` + per-client `bridge`** (marquee, supports 2-20 clients) | One `remindb serve --listen 127.0.0.1:39291` owns the DB. Each client spawns `remindb bridge`, which forwards stdio MCP frames over loopback TCP. Diagram above. | 2 or more concurrent clients sharing one DB, up to ~20. One process owns rescan, write serialization, and the cold-node notifier; temperature counters stay coherent. |
+
+Per-client `serve` is the single-client shape — one MCP client speaks stdio to one `remindb serve`, which owns the `.db`. No diagram needed; it is just `client -> remindb serve -> .db`.
+
+Migration between the two shapes is reversible — swap `serve` for `bridge --addr ...` in each client's MCP config. The MCP tool surface is identical either way.
 
 Security boundary: ReminDB-Local-Hub is for localhost. MCP has no auth here; do not bind `--listen` to a public interface.
 
@@ -171,9 +185,37 @@ flowchart TB
 
 ## Install
 
-There are no ReminDB-Local-Hub release installers yet. Build from source for now. Do not use upstream one-line installers if you need `remindb bridge`; upstream releases do not include ReminDB-Local-Hub.
+The fastest path is the one-liner installer for the latest release. It resolves the matching archive for your OS + architecture, verifies SHA256 against `checksums.txt`, and drops the binary into the standard per-user install location.
+
+### One-liner (Windows PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/special-place-administrator/remindb-Local-Hub/main/install.ps1 | iex
+```
+
+Binary lands at `%LOCALAPPDATA%\Programs\remindb\bin\remindb.exe`. If that directory is not on `PATH`, the installer prints the persistent-add snippet:
+
+```powershell
+[Environment]::SetEnvironmentVariable(
+  "Path",
+  [Environment]::GetEnvironmentVariable("Path", "User") + ";$env:LOCALAPPDATA\Programs\remindb\bin",
+  "User"
+)
+```
+
+Open a new terminal after changing PATH.
+
+### One-liner (Linux / macOS)
+
+```bash
+curl -sSf https://raw.githubusercontent.com/special-place-administrator/remindb-Local-Hub/main/install.sh | sh
+```
+
+Binary lands at `~/.local/bin/remindb`. Same SHA256 verification flow.
 
 ### From source (Go 1.26+)
+
+Source builds are still supported if you need an unreleased commit or a non-tier-1 platform.
 
 Linux / macOS:
 
@@ -195,22 +237,15 @@ go build -o .\remindb.exe .\cmd\remindb
 $installDir = "$env:LOCALAPPDATA\Programs\remindb\bin"
 New-Item -ItemType Directory -Force -Path $installDir | Out-Null
 Copy-Item .\remindb.exe "$installDir\remindb.exe" -Force
-
-# Add once if it is not already on PATH.
-[Environment]::SetEnvironmentVariable(
-  "Path",
-  [Environment]::GetEnvironmentVariable("Path", "User") + ";$installDir",
-  "User"
-)
 ```
 
-Verify:
+### Verify
 
 ```bash
 remindb --version
 ```
 
-Open a new terminal after changing PATH on Windows.
+Expect `remindb version vX.Y.Z` matching the latest release tag.
 
 ### Create a database
 
@@ -523,7 +558,7 @@ remindb bench \
 
 ### `update`
 
-Reinstalls remindb in place by re-running the configured install script. Until ReminDB-Local-Hub publishes its own releases/installers, do not use `remindb update` if you need `bridge`; rebuild from this repo instead.
+Reinstalls remindb in place by re-running `install.ps1` (Windows) or `install.sh` (Linux / macOS) from the `main` branch of this repo. Picks up the latest GitHub release.
 
 ```bash
 remindb update
