@@ -1,6 +1,6 @@
 {
     "name": "remindb-local-hub",
-    "version": "0.1.8",
+    "version": "0.1.0",
     "description": "Token-efficient agentic memory database. Mounts ReminDB-Local-Hub as an MCP server, exposing the Memory* tool suite over a compiled SQLite view of the workspace.",
     "homepage": "https://github.com/special-place-administrator/remindb-Local-Hub",
     "repository": "https://github.com/special-place-administrator/remindb-Local-Hub",
