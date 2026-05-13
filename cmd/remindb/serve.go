@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -24,6 +26,7 @@ var (
 	rescanInterval time.Duration
 	verbose        bool
 	listenAddr     string
+	serveLogFile   string
 )
 
 var serveCmd = &cobra.Command{
@@ -37,6 +40,7 @@ func init() {
 	serveCmd.Flags().DurationVar(&rescanInterval, "rescan-interval", 0, "Rescan interval (e.g. 30s, 5m); 0 uses default (falls back to REMINDB_RESCAN_INTERVAL)")
 	serveCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Emit debug-level logs (default level is info)")
 	serveCmd.Flags().StringVar(&listenAddr, "listen", "", "TCP listen address for multi-client MCP transport; empty uses stdio")
+	serveCmd.Flags().StringVar(&serveLogFile, "log-file", "", "Redirect slog text output to this file (default: stderr)")
 	rootCmd.AddCommand(serveCmd)
 }
 
@@ -47,16 +51,31 @@ func runServe(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	logger := newServeLogger(verbose)
+	logger, closeLogger, err := newServeLogger(verbose, serveLogFile)
+	if err != nil {
+		return err
+	}
+	defer closeLogger()
 
+	inService, err := isWindowsService()
+	if err != nil {
+		return fmt.Errorf("failed to detect service context: %w", err)
+	}
+	if inService {
+		return runServeAsService(logger)
+	}
+
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+	return serveCore(ctx, logger)
+}
+
+func serveCore(ctx context.Context, logger *slog.Logger) error {
 	st, err := store.Open(dbPath)
 	if err != nil {
 		return fmt.Errorf("failed to open: %s: %w", dbPath, err)
 	}
 	defer func() { _ = st.Close() }()
-
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	defer stop()
 
 	if err := st.Migrate(ctx); err != nil {
 		return fmt.Errorf("failed to migrate: %w", err)
@@ -184,12 +203,27 @@ func handleMCPConn(ctx context.Context, srv *remindb.Server, logger *slog.Logger
 	_ = conn.Close()
 }
 
-func newServeLogger(verbose bool) *slog.Logger {
+func newServeLogger(verbose bool, logFile string) (*slog.Logger, func(), error) {
 	level := slog.LevelInfo
 	if verbose {
 		level = slog.LevelDebug
 	}
-	return slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: level}))
+
+	var w io.Writer = os.Stderr
+	closeFn := func() {}
+	if logFile != "" {
+		if err := os.MkdirAll(filepath.Dir(logFile), 0o755); err != nil {
+			return nil, nil, fmt.Errorf("failed to create log dir: %w", err)
+		}
+		f, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to open log file: %s: %w", logFile, err)
+		}
+		w = f
+		closeFn = func() { _ = f.Close() }
+	}
+
+	return slog.New(slog.NewTextHandler(w, &slog.HandlerOptions{Level: level})), closeFn, nil
 }
 
 func applyServeEnv(cmd *cobra.Command) error {

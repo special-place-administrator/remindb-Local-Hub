@@ -5,6 +5,9 @@
 *.exe
 *.test
 
+# Per-workstation tooling caches
+.symforge/
+
 # Database artifacts
 *.db
 *.db-shm
