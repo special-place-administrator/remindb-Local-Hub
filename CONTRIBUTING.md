@@ -4,6 +4,7 @@ This file is the routing map for contributing. The deep rules live in [`.claude/
 
 ## Table of contents
 
+- [Project status — hard fork, independent maintenance](#project-status--hard-fork-independent-maintenance)
 - [Project design and goals](#project-design-and-goals)
 - [Ways to contribute](#ways-to-contribute)
 - [AI-assisted development](#ai-assisted-development)
@@ -16,6 +17,17 @@ This file is the routing map for contributing. The deep rules live in [`.claude/
 - [Recognition](#recognition)
 - [Security](#security)
 - [License](#license)
+
+## Project status — hard fork, independent maintenance
+
+`ReminDB-Local-Hub` is a **hard fork** of an upstream `remindb` lineage. It is maintained here as an independent project: there is no sync with the upstream repo, no expectation that fixes here flow upstream, and no obligation to track upstream's roadmap. The MIT `LICENSE` retains the original copyright header; everything else (release cadence, naming, plugin manifests, install path, MCP topology, Windows Service support) is decided in this repo.
+
+What that means for contributors:
+
+- PRs are welcome and reviewed on their own merit. They don't need to land upstream and they don't need to be portable back to upstream.
+- Versioning and release cadence are this fork's call. Pre-1.0 means breaking changes between minor versions are allowed when justified — see [`CHANGELOG.md`](./CHANGELOG.md).
+- Bug reports go to this repo's issue tracker; please don't redirect to upstream.
+- If upstream releases a fix relevant here, it will be cherry-picked on a case-by-case basis (with attribution), not auto-synced.
 
 ## Project design and goals
 
