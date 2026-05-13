@@ -80,7 +80,7 @@ flowchart LR
 
 ### Topology choice
 
-The v0.1.0 binary supports two shapes. Both are valid; the right one depends on how many clients share the database.
+The `remindb` binary supports two shapes. Both are valid; the right one depends on how many clients share the database.
 
 | Shape | Process model | When to use |
 |---|---|---|
@@ -271,13 +271,19 @@ Optional but recommended: put a `.remindb.ignore` file at the source root to exc
 
 ### Configure MCP clients
 
-For ReminDB-Local-Hub, every MCP client should spawn `remindb bridge`, not `remindb serve`. The bridge starts one singleton local server if needed:
+For ReminDB-Local-Hub, every MCP client should spawn `remindb bridge`, not `remindb serve`. The bridge talks to one singleton local server:
 
 ```text
 client stdio -> remindb bridge -> 127.0.0.1:39291 -> one remindb serve --listen process -> one .db
 ```
 
 Use the same `--addr`, `--db`, and `--source` for every agent that should share the database.
+
+**Singleton lifecycle.** Something has to own the `serve --listen` process. Recommended setups:
+
+- **Windows:** `remindb service install --db <path> --source <dir> --listen 127.0.0.1:39291` (see [`service`](#service-windows-only) below). The Service Control Manager keeps the singleton running across reboots, windowless, logging to `C:\ProgramData\remindb\service.log`.
+- **Linux / macOS:** a `systemd` user unit or `launchd` agent invoking `remindb serve --listen ...` is the cleanest. Or a long-lived shell for one-off use.
+- **Fallback:** `remindb bridge` itself will auto-spawn a singleton if none is reachable within `--startup-timeout`. Good enough for casual use; less reliable than an SCM-managed service.
 
 #### Claude Code
 
