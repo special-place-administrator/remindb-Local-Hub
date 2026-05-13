@@ -54,7 +54,7 @@ try {
 
 	cmd := exec.Command(shell, "-NoProfile", "-NonInteractive", "-File", scriptPath)
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		CreationFlags: windows.DETACHED_PROCESS | windows.CREATE_NEW_PROCESS_GROUP,
+		CreationFlags: windows.CREATE_NO_WINDOW | windows.CREATE_NEW_PROCESS_GROUP,
 		HideWindow:    true,
 	}
 	if err := cmd.Start(); err != nil {
