@@ -108,10 +108,31 @@ try {
 
 	Write-Host "Installing to $binPath..."
 	Expand-Archive -Path $archivePath -DestinationPath $tmpdir -Force
-	if (Test-Path $binPath) {
-		Remove-Item -Path $binPath -Force
+
+	$srcExe = Join-Path $tmpdir 'remindb.exe'
+	$lastErr = $null
+	$copied = $false
+	foreach ($attempt in 1..10) {
+		try {
+			if (Test-Path $binPath) { Remove-Item -Path $binPath -Force -ErrorAction Stop }
+			Copy-Item -Path $srcExe -Destination $binPath -Force -ErrorAction Stop
+			$copied = $true
+			break
+		} catch {
+			$lastErr = $_
+			Start-Sleep -Milliseconds 500
+		}
 	}
-	Copy-Item -Path (Join-Path $tmpdir 'remindb.exe') -Destination $binPath -Force
+
+	if (-not $copied) {
+		$svc = Get-Service -Name 'remindb-singleton' -ErrorAction SilentlyContinue
+		$svcHint = if ($svc -and $svc.Status -eq 'Running') {
+			"`n  The 'remindb-singleton' Windows Service is currently running and holds $binPath open.`n  Stop it first (admin shell): remindb service stop`n  Then re-run this installer, and restart it: remindb service start"
+		} else {
+			"`n  Some process is holding $binPath open. Check Get-Process remindb and stop any holders."
+		}
+		throw "failed to install after 10 attempts: $lastErr$svcHint"
+	}
 
 	Write-Host "Installed: $binPath ($tag)"
 

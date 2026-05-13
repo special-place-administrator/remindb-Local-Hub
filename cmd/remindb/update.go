@@ -1,11 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
-	"runtime"
-
 	"github.com/spf13/cobra"
 )
 
@@ -26,44 +21,5 @@ func init() {
 
 func runUpdate(cobraCmd *cobra.Command, _ []string) error {
 	cobraCmd.SilenceUsage = true
-
-	cmd, err := installCommand()
-	if err != nil {
-		return err
-	}
-
-	fmt.Fprintf(os.Stderr, "running: %s\n", cmd.String())
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to update: %w", err)
-	}
-	return nil
-}
-
-func installCommand() (*exec.Cmd, error) {
-	switch runtime.GOOS {
-	case "windows":
-		shell, err := windowsPowerShell()
-		if err != nil {
-			return nil, err
-		}
-		return exec.Command(shell, "-NoProfile", "-Command", "iwr -useb "+installPSURL+" | iex"), nil
-	case "linux", "darwin":
-		return exec.Command("bash", "-c", "curl -fsSL "+installShellURL+" | bash"), nil
-	default:
-		return nil, fmt.Errorf("unsupported platform: %s", runtime.GOOS)
-	}
-}
-
-func windowsPowerShell() (string, error) {
-	if path, err := exec.LookPath("pwsh.exe"); err == nil {
-		return path, nil
-	}
-	if path, err := exec.LookPath("powershell.exe"); err == nil {
-		return path, nil
-	}
-	return "", fmt.Errorf("no PowerShell found on PATH (expected pwsh.exe or powershell.exe)")
+	return platformUpdate()
 }
