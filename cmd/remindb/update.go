@@ -46,10 +46,24 @@ func runUpdate(cobraCmd *cobra.Command, _ []string) error {
 func installCommand() (*exec.Cmd, error) {
 	switch runtime.GOOS {
 	case "windows":
-		return exec.Command("powershell", "-Command", "iwr -useb "+installPSURL+" | iex"), nil
+		shell, err := windowsPowerShell()
+		if err != nil {
+			return nil, err
+		}
+		return exec.Command(shell, "-NoProfile", "-Command", "iwr -useb "+installPSURL+" | iex"), nil
 	case "linux", "darwin":
 		return exec.Command("bash", "-c", "curl -fsSL "+installShellURL+" | bash"), nil
 	default:
 		return nil, fmt.Errorf("unsupported platform: %s", runtime.GOOS)
 	}
+}
+
+func windowsPowerShell() (string, error) {
+	if path, err := exec.LookPath("pwsh.exe"); err == nil {
+		return path, nil
+	}
+	if path, err := exec.LookPath("powershell.exe"); err == nil {
+		return path, nil
+	}
+	return "", fmt.Errorf("no PowerShell found on PATH (expected pwsh.exe or powershell.exe)")
 }

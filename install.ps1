@@ -8,6 +8,26 @@ param(
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 
+if ($PSVersionTable.PSVersion.Major -lt 5) {
+	throw "remindb installer requires PowerShell 5.1 or newer; current version is $($PSVersionTable.PSVersion)"
+}
+
+function Get-Sha256Hex {
+	param([Parameter(Mandatory)][string]$Path)
+	$sha = [System.Security.Cryptography.SHA256]::Create()
+	try {
+		$stream = [System.IO.File]::OpenRead($Path)
+		try {
+			$bytes = $sha.ComputeHash($stream)
+		} finally {
+			$stream.Dispose()
+		}
+		return ([System.BitConverter]::ToString($bytes) -replace '-','').ToLower()
+	} finally {
+		$sha.Dispose()
+	}
+}
+
 $repo = 'special-place-administrator/remindb-Local-Hub'
 
 function Show-Usage {
@@ -77,7 +97,7 @@ try {
 		throw "$archive not listed in checksums.txt"
 	}
 
-	$actual = (Get-FileHash -Path $archivePath -Algorithm SHA256).Hash.ToLower()
+	$actual = Get-Sha256Hex -Path $archivePath
 	if ($actual -ne $expected) {
 		throw "checksum mismatch for ${archive}: expected $expected, got $actual"
 	}

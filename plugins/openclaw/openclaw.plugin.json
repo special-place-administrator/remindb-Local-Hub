@@ -1,7 +1,7 @@
 {
     "id": "remindb",
     "name": "ReminDB-Local-Hub",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Token-efficient agentic memory database. Exposes the ReminDB-Local-Hub Memory* MCP tool suite so OpenClaw agents can work against a compiled view of their workspace.",
     "homepage": "https://github.com/special-place-administrator/remindb-Local-Hub",
     "license": "MIT",
